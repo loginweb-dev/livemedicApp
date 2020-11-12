@@ -63,7 +63,7 @@ export default function CardProfileHorizontal(props) {
                                 title='Nueva cita ahora'
                                 color='green'
                                 colorText='white'
-                                onPress={() => ToastAndroid.showWithGravityAndOffset('Llamando...', ToastAndroid.LONG, ToastAndroid.BOTTOM, 25, 50)}
+                                onPress={ props.onPress }
                             />
                         }
                     </View>
