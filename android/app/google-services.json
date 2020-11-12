@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "264229003943",
+    "firebase_url": "https://livemedic-f4c12.firebaseio.com",
+    "project_id": "livemedic-f4c12",
+    "storage_bucket": "livemedic-f4c12.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:264229003943:android:67ba643352323040357182",
+        "android_client_info": {
+          "package_name": "com.loginweb.livemedic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "264229003943-5j3ta4d1997u73kfrsv3de705mokgmok.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7ru4GHekakVV2BqN18lfpmfRaMeKNWyU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "264229003943-5j3ta4d1997u73kfrsv3de705mokgmok.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
