@@ -78,18 +78,15 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         width: screenWidth,
+        backgroundColor: 'white',
     },
     cardContainer: {
-        borderWidth: 1,
-        borderColor: '#ddd',
         borderBottomWidth: 0,
         shadowColor: '#ddd',
         shadowOffset: { width: 0, height: 3 },
-        backgroundColor: 'white',
         shadowOpacity: 0.8,
         shadowRadius: 2,
         width: '100%',
-        elevation: 3,
         marginBottom: 10
     }
 });

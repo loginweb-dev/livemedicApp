@@ -66,9 +66,9 @@ class Config extends Component {
                             </View>
                         </TouchableOpacity>
                         <View style={ [styles.cardContainer, { marginTop: 20, borderTopColor: '#F5F5F5', borderTopWidth: 2, paddingTop: 10 } ] }>
-                            <Counter amount='12' label='Carreras' />
-                            <Counter amount='4,5' label='Puntos' />
-                            <Counter amount='1,2 K' label='Monto' />
+                            <Counter amount='12' label='Citas médicas' />
+                            <Counter amount='6' label='Recetas' />
+                            <Counter amount='4' label='Laboratorios' />
                         </View>
                     </Card>
                     <ClearFix height={50} />

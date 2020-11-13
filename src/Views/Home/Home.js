@@ -61,29 +61,27 @@ export default class Home extends Component {
     render(){
         return (
             <SafeAreaView style={ styles.container }>
-                {/* <ScrollView showsVerticalScrollIndicator={false}> */}
-                    <FlatList
-                        data={Specialities}
-                        renderItem={({item, index})=>
-                        <CardBorderLeft
-                            key={item.id}
-                            title={item.title}
-                            count={item.count}
-                            icon={item.icon}
-                            borderColor={item.borderColor}
-                            onPress={() =>
-                                this.props.navigation.navigate('ProfileList', {
-                                    speciality: 
-                                        { id:  item.id, title:  item.title}
-                                })
-                            }
-                        />
+                <FlatList
+                    data={Specialities}
+                    renderItem={({item, index})=>
+                    <CardBorderLeft
+                        key={item.id}
+                        title={item.title}
+                        count={item.count}
+                        icon={item.icon}
+                        borderColor={item.borderColor}
+                        onPress={() =>
+                            this.props.navigation.navigate('ProfileList', {
+                                speciality: 
+                                    { id:  item.id, title:  item.title}
+                            })
                         }
-                        numColumns={2}
                     />
-                    
-                    <ClearFix height={50} />
-                {/* </ScrollView> */}
+                    }
+                    numColumns={2}
+                />
+                
+                <ClearFix height={50} />
             </SafeAreaView>
         )
     }

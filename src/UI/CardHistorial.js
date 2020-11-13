@@ -7,22 +7,19 @@ import {
     Image
 } from 'react-native';
 
-export default function CardRace(props) {
+export default function CardHistorial(props) {
     return (
         <TouchableOpacity onPress={props.onPress} >
             <View style={ [styles.cardContainer] }>
                 <View style={{ width: '20%', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <Image
                         style={{ width: 50, height: 50, borderRadius: 25 }}
-                        source={{uri: 'https://reactnative.dev/img/tiny_logo.png',}}
+                        source={ {uri: props.avatar} }
                     />
                 </View>
-                <View style={{ width: '60%' }}>
-                    <Text style={{ fontSize: 18, color: 'black' }} numberOfLines={1}>{ props.customer }</Text>
-                    <Text style={{ fontSize: 13, color: '#909090', marginTop: 3 }} numberOfLines={2}>{ props.description }</Text>
-                </View>
-                <View style={{ width: '20%', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={{ fontSize: 20, color: '#5B5C5E' }}>{ props.amount }</Text>
+                <View style={{ width: '80%' }}>
+                    <Text style={{ fontSize: 18, color: 'black' }} numberOfLines={1}>{ props.name }</Text>
+                    <Text style={{ fontSize: 13, color: '#909090', marginTop: 3 }} numberOfLines={2}>{ props.date }</Text>
                 </View>
             </View>
         </TouchableOpacity>

@@ -185,8 +185,7 @@ const styles = StyleSheet.create({
     form:{
         paddingTop: 20,
         backgroundColor: '#fff',
-        borderTopRightRadius: 20,
-        borderTopLeftRadius: 20
+        borderRadius: 20
     }
 });
 

@@ -38,7 +38,7 @@ class SplashScreen extends Component {
         return (
             <View style={ style.container }>
                 <Image 
-                    source={{uri: 'https://mystorage.loginweb.dev/storage/Projects/medicweb/icon-app.png'}}
+                    source={ require('../assets/images/icon.png') }
                     style={style.logo}
                     resizeMode="contain"
                 />

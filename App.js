@@ -24,7 +24,7 @@ import SplashScreen from "./src/UI/SplashScreen";
 import Login from "./src/Views/Auth/Login/Login";
 import Register from "./src/Views/Auth/Register/Register";
 import Home from "./src/Views/Home/Home";
-import RaceList from "./src/Views/RaceList/RaceList";
+import Historial from "./src/Views/Historial/Historial";
 import Config from "./src/Views/Config/Config";
 import ProfileList from "./src/Views/ProfileList/ProfileList";
 import ProfileView from "./src/Views/ProfileView/ProfileView";
@@ -171,7 +171,7 @@ function LogoTitle() {
     <View style={{ flex: 1, flexDirection: 'row' }}>
       <Image
         style={{ width: 40, height: 40 }}
-        source={{uri: 'https://mystorage.loginweb.dev/storage/Projects/medicweb/icon-app.png'}}
+        source={ require('./src/assets/images/icon.png') }
       />
       <Text style={{ marginLeft: 15, fontSize: 25 }}>LiveMedic</Text>
     </View>
@@ -199,12 +199,12 @@ function TabMenu() {
         }}
       />
       <Tab.Screen
-        name="List"
-        component={RaceList}
+        name="Historial"
+        component={Historial}
         options={{
-          tabBarLabel: 'Carreras',
+          tabBarLabel: 'Historial',
           tabBarIcon: ({ color }) => (
-            <Icon name="ios-car-sport-sharp" color={color} size={26} />
+            <Icon name="folder-outline" color={color} size={26} />
           ),
         }}
       />
@@ -212,9 +212,9 @@ function TabMenu() {
         name="Profile"
         component={Config}
         options={{
-          tabBarLabel: 'Configuración',
+          tabBarLabel: 'Perfil',
           tabBarIcon: ({ color }) => (
-            <Icon name="ios-settings" color={color} size={26} />
+            <Icon name="person-circle-outline" color={color} size={26} />
           ),
         }}  
       />

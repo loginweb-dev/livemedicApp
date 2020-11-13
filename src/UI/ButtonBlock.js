@@ -23,7 +23,6 @@ export default function ButtonBlock(props) {
 
 const styles = StyleSheet.create({
     button: {
-        flex: 1,
         alignItems: 'center',
         borderRadius: 3,
         marginVertical: 5,
