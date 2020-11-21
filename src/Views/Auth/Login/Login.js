@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import { connect } from 'react-redux';
+import { showMessage } from "react-native-flash-message";
 
 // Firebase
 import auth from '@react-native-firebase/auth';
@@ -20,6 +21,9 @@ import BackgroundColor from "../../../UI/BackgroundColor";
 import TextInputAlt from "../../../UI/TextInputAlt";
 import ButtonBlock from "../../../UI/ButtonBlock";
 
+// Config
+import { env, strRandom } from "../../../config/env";
+
 GoogleSignin.configure({
     scopes: ['https://www.googleapis.com/auth/drive.readonly'],
     webClientId: '264229003943-5j3ta4d1997u73kfrsv3de705mokgmok.apps.googleusercontent.com',
@@ -30,6 +34,10 @@ GoogleSignin.configure({
 class Login extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            email: 'admin3@admin.com',
+            password: 'password'
+        }
     }
 
     onFacebookButtonPress = async () => {
@@ -42,35 +50,27 @@ class Login extends Component {
 
         // Once signed in, get the users AccesToken
         AccessToken.getCurrentAccessToken()
-        .then((data) => {
+        .then(async (data) => {
             const facebookCredential = auth.FacebookAuthProvider.credential(data.accessToken);
             // Sign-in the user with the credential
             auth().signInWithCredential(facebookCredential);
 
             // Get information from Facebook API 
-            fetch(`https://graph.facebook.com/me?fields=id,name,email&access_token=${data.accessToken}`)
+            let userInfo = await fetch(`https://graph.facebook.com/me?fields=id,name,email&access_token=${data.accessToken}`)
             .then(res => res.json())
-            .then(res => {
-                let user = {
-                    id: res.id,
-                    name: res.name,
-                    email: res.email ? res.email : `${res.id}@loginweb.dev`,
-                    codePhone: '+591',
-                    numberPhone: '',
-                    avatar: `http://graph.facebook.com/${res.id}/picture?type=large`,
-                    type: 'facebook'
-                }
-                this.props.setUser(user);
-                AsyncStorage.setItem('SessionUser', JSON.stringify(user));
-                this.props.navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'TabMenu' }],
-                    key: null,
-                });
-            })
-            .catch(error => {
-                console.log(error);
-            })
+            .then(res => res)
+            .catch(error => ({'error': error}));
+
+            let paramans = {
+                name: userInfo.name,
+                email: userInfo.email ? userInfo.email : `${userInfo.id}@loginweb.dev`,
+                avatar: `http://graph.facebook.com/${userInfo.id}/picture?type=large`,
+                password: strRandom(10),
+                social_login: 'facebook'
+            }
+
+            this.handleLogin(paramans);
+
         })
     }
 
@@ -78,44 +78,67 @@ class Login extends Component {
         try {
             await GoogleSignin.hasPlayServices();
             const userInfo = await GoogleSignin.signIn();
-            let user = {
-                id: userInfo.user.id,
-                name: userInfo.user.name,
+            let paramans = {
+                name: userInfo.user.givenName,
+                last_name: userInfo.user.familyName,
                 email: userInfo.user.email,
-                codePhone: '+591',
-                numberPhone: '',
                 avatar: userInfo.user.photo,
-                type: 'google'
-            }
-            this.props.setUser(user);
-            AsyncStorage.setItem('SessionUser', JSON.stringify(user));
-            this.props.navigation.reset({
-                index: 0,
-                routes: [{ name: 'TabMenu' }],
-                key: null,
-            });
+                password: strRandom(10),
+                social_login: 'google'
+            };
+            this.handleLogin(paramans);
+
         } catch (error) {
             console.log(error)
         }
     }
 
-    handleLogin(){
-        let user = {
-            id: 1,
-            name: 'Invitado',
-            email: 'invitado@gamil.com',
-            codePhone: '+591',
-            numberPhone: '',
-            avatar: 'https://reactnative.dev/img/tiny_logo.png',
-            type: 'dashboard'
+    async manualLogin(){
+        let paramans = {
+            email: this.state.email,
+            password: this.state.password
+        };
+
+        let req = await fetch(`${env.API}/api/auth/login`, {
+            method: 'POST',
+            body: JSON.stringify(paramans),
+            headers:{
+                'Content-Type': 'application/json',
+                'accept': 'application/json'
+            }
+        }).then(res => res.json())
+        .catch(error => ({'error': error}));
+
+        this.handleLogin(paramans);
+    }
+
+    async handleLogin(paramans){
+        let req = await fetch(`${env.API}/api/auth/login`, {
+            method: 'POST',
+            body: JSON.stringify(paramans),
+            headers:{
+                'Content-Type': 'application/json',
+                'accept': 'application/json'
+            }
+        }).then(res => res.json())
+        .catch(error => ({'error': error}));
+
+        if(req.user){
+            this.props.setUser(req);
+            AsyncStorage.setItem('SessionUser', JSON.stringify(req));
+            this.props.navigation.reset({
+                index: 0,
+                routes: [{ name: 'TabMenu' }],
+                key: null,
+            });
+        }else{
+            showMessage({
+                message: "Error",
+                description: req.error ? req.error : 'Error desconocido.',
+                type: "danger",
+                icon: 'danger'
+            });
         }
-        this.props.setUser(user);
-        AsyncStorage.setItem('SessionUser', JSON.stringify(user));
-        this.props.navigation.reset({
-            index: 0,
-            routes: [{ name: 'TabMenu' }],
-            key: null,
-        });
     }
 
     render(){
@@ -131,11 +154,15 @@ class Login extends Component {
                             label='Email'
                             placeholder='Tu email o celular'
                             keyboardType='email-address'
+                            value={ this.state.email }
+                            onChangeText={ value => this.setState({email: value}) }
                         />
                         <TextInputAlt
                             label='Contraseña'
                             placeholder='Tu contraseña'
                             password
+                            value={ this.state.password }
+                            onChangeText={ value => this.setState({password: value}) }
                         />
                         <View style={{ margin: 20 }}>
                             <ButtonBlock
@@ -143,7 +170,7 @@ class Login extends Component {
                                 color='white'
                                 borderColor='#3b5998'
                                 colorText='#3b5998'
-                                onPress={() => this.handleLogin()}
+                                onPress={() => this.manualLogin()}
                             />
                         </View>
                         <View style={{ alignItems: 'center', width: '100%' }}>
@@ -191,9 +218,9 @@ const styles = StyleSheet.create({
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        setUser : (user) => dispatch({
-            type: 'SET_USER',
-            payload: user
+        setUser : (authLogin) => dispatch({
+            type: 'AUTH_LOGIN',
+            payload: authLogin
         })
     }
 }

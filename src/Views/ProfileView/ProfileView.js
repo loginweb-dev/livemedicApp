@@ -73,7 +73,6 @@ export default class ProfileView extends Component {
     }
 
     handleCreditCard = form => {
-        // console.log(form)
         this.setState({
             PaymentCreditCardValid: form.valid
         });
@@ -107,12 +106,12 @@ export default class ProfileView extends Component {
         return (
             <SafeAreaView style={ styles.container }>
                 <CardProfileHorizontal
-                    name={this.state.specialist.name}
+                    name={this.state.specialist.full_name}
                     location={this.state.specialist.location}
-                    avatar={this.state.specialist.avatar}
-                    price={this.state.specialist.price}
-                    rating={this.state.specialist.rating}
-                    available={this.state.specialist.available}
+                    avatar={this.props.route.params.avatar}
+                    price={this.props.route.params.price}
+                    rating={this.props.route.params.rating}
+                    available={this.state.specialist.status}
                     onPress={() => this.setState({paymentModal: true})}
                 />
                 {/* Modal payment */}

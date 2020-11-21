@@ -28,6 +28,12 @@ class Config extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            name: this.props.authLogin.user.customer.name,
+            last_name: this.props.authLogin.user.customer.last_name,
+            phones: this.props.authLogin.user.customer.phones,
+            address: this.props.authLogin.user.customer.address,
+            email: this.props.authLogin.user.email,
+            avatar: this.props.authLogin.user.avatar,
             formShow: false
         }
     }
@@ -52,13 +58,13 @@ class Config extends Component {
                                 <View style={{ width: '40%', flex: 1 }}>
                                     <Image
                                         style={{ width: 80, height: 80, borderRadius: 40 }}
-                                        source={{ uri: this.props.user.avatar }}
+                                        source={{ uri: this.state.avatar }}
                                     />
                                 </View>
                                 <View style={{ width: '60%', paddingLeft: 30 }}>
-                                    <Text style={{ fontSize: 18, color: 'black' }} numberOfLines={1}>{ this.props.user.name }</Text>
-                                    <Text style={ styles.textMuted } numberOfLines={1}>{ this.props.user.email }</Text>
-                                    <Text style={ styles.textMuted } numberOfLines={1}>{ this.props.user.phone }</Text>
+                                    <Text style={{ fontSize: 18, color: 'black' }} numberOfLines={1}>{ this.state.name }</Text>
+                                    <Text style={ styles.textMuted } numberOfLines={1}>{ this.state.email }</Text>
+                                    <Text style={ styles.textMuted } numberOfLines={1}>{ this.state.phones }</Text>
                                 </View>
                                 <View style={{ width: '5%', flex: 1, alignItems: 'center', flexDirection: 'row-reverse' }}>
                                     <Icon name="chevron-forward" />
@@ -87,24 +93,37 @@ class Config extends Component {
                             <Text style={{ fontSize: 20, marginHorizontal: 20, marginBottom: 20 }}>Editar Perfil</Text>
                             <Image
                                 style={{ width: 80, height: 80, borderRadius: 40, marginVertical: 10 }}
-                                source={{ uri: this.props.user.avatar }}
+                                source={{ uri: this.state.avatar }}
                             />
                         </View>
                         <View style={ styles.form }>
                             <TextInputAlt
-                                label='Nombre completo'
-                                placeholder='Tu nombre completo'
+                                label='Nombre'
+                                placeholder='Tu nombre'
                                 autoCapitalize='words'
+                                value={ this.state.name }
+                                onChangeText={ value => this.setState({name: value}) }
+                            />
+                            <TextInputAlt
+                                label='Apellidos'
+                                placeholder='Tus apellidos'
+                                autoCapitalize='words'
+                                value={ this.state.last_name }
+                                onChangeText={ value => this.setState({last_name: value}) }
                             />
                             <TextInputAlt
                                 label='Número de celular'
                                 placeholder='Tu número de celular'
                                 keyboardType='phone-pad'
+                                value={ this.state.phones }
+                                onChangeText={ value => this.setState({phones: value}) }
                             />
                             <TextInputAlt
                                 label='Email'
                                 placeholder='Tu email o celular'
                                 keyboardType='email-address'
+                                value={ this.state.email }
+                                onChangeText={ value => this.setState({email: value}) }
                             />
                             <TextInputAlt
                                 label='Contraseña'
@@ -163,7 +182,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
     return {
-        user: state.user,
+        authLogin: state.authLogin,
     }
 }
 

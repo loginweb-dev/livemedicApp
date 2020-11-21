@@ -11,19 +11,47 @@ import Icon from 'react-native-vector-icons/Ionicons';
 const screenWidth = Math.round(Dimensions.get('window').width);
 
 export default function CardBorderLeft(props) {
+
+    var carColor = ''
+    switch (props.borderColor) {
+        case 'primary':
+            carColor = '#0275d8';
+            break;
+        case 'success':
+            carColor = '#5cb85c';
+            break;
+        case 'info':
+            carColor = '#5bc0de';
+            break;
+        case 'warning':
+            carColor = '#f0ad4e';
+            break;
+        case 'danger':
+            carColor = '#d9534f';
+            break;
+        case 'light':
+            carColor = '#f7f7f7';
+            break;
+        case 'dark':
+            carColor = '#292b2c';
+            break;
+        default:
+            break;
+    }
+
     return (
         <View style={ styles.card }>
-            <View style={ [styles.cardContainer, { borderLeftColor: props.borderColor ? props.borderColor : 'black' }] }>
+            <View style={ [styles.cardContainer, { borderLeftColor: carColor ? carColor : 'black' }] }>
                 <TouchableOpacity
                     style={{ flexDirection: 'row' }}
                     onPress={props.onPress}
                 >
                     <View style={{ width: '85%' }}>
-                        <Text style={{ fontSize: 20, color: props.borderColor ? props.borderColor : 'black' }} numberOfLines={1}>{ props.title }</Text>
+                        <Text style={{ fontSize: 20, color: carColor ? carColor : 'black' }} numberOfLines={1}>{ props.title }</Text>
                         <Text style={{ fontSize: 22, color: '#5B5C5E' }} numberOfLines={1}>{ props.count }</Text>
                     </View>
                     <View style={{ width: '15%', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                        <Icon name="md-medkit-outline" size={20} color={props.borderColor ? props.borderColor : 'black'} />
+                        <Icon name="md-medkit-outline" size={20} color={ carColor ? carColor : 'black'} />
                     </View>
                 </TouchableOpacity>
             </View>

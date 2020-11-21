@@ -11,9 +11,14 @@ import {
     FlatList
 } from 'react-native';
 
+import { connect } from 'react-redux';
+
 // UI
 import CardBorderLeft from "../../UI/CardBorderLeft";
 import ClearFix from "../../UI/ClearFix";
+
+// Config
+import { env } from "../../config/env";
 
 const Specialities = [
     {
@@ -53,28 +58,46 @@ const Specialities = [
     }
 ]
 
-export default class Home extends Component {
+class Home extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            specialities: []
+        }
+    }
+
+    componentDidMount(){
+        let headers = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'accept': 'application/json',
+                    'Authorization': `Bearer ${this.props.authLogin.token}`
+                },
+            }
+        fetch(`${env.API}/api/index`, headers)
+        .then(res => res.json())
+        .then(res => {
+            this.setState({
+                specialities: res.specialities
+            });
+        })
+        .catch(error => ({'error': error}));
     }
 
     render(){
         return (
             <SafeAreaView style={ styles.container }>
                 <FlatList
-                    data={Specialities}
+                    data={this.state.specialities}
                     renderItem={({item, index})=>
                     <CardBorderLeft
                         key={item.id}
-                        title={item.title}
-                        count={item.count}
-                        icon={item.icon}
-                        borderColor={item.borderColor}
+                        title={item.name}
+                        count={item.specialists.length}
+                        icon='car-sport-sharp'
+                        borderColor={item.color}
                         onPress={() =>
-                            this.props.navigation.navigate('ProfileList', {
-                                speciality: 
-                                    { id:  item.id, title:  item.title}
-                            })
+                            this.props.navigation.navigate('ProfileList', { speciality: item })
                         }
                     />
                     }
@@ -96,3 +119,11 @@ const styles = StyleSheet.create({
         // alignItems: 'center',
     }
 });
+
+const mapStateToProps = (state) => {
+    return {
+        authLogin: state.authLogin,
+    }
+}
+
+export default connect(mapStateToProps)(Home);

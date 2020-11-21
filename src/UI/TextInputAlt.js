@@ -10,7 +10,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function TextInputAlt(props) {
 
-    var [showPassword, handleShowPassword] = useState(false);
+    var [showPassword, handleShowPassword] = useState(true);
 
     return (
         <View style={{ paddingHorizontal: 20, paddingVertical: 10 }}>

@@ -86,7 +86,7 @@ function App() {
           <Stack.Screen
             name="ProfileList" component={ProfileList}
             options={({ route }) => ({
-              title: <Text>{route.params.speciality.title}</Text>,
+              title: <Text>{route.params.speciality.name}</Text>,
             })}
           />
           <Stack.Screen
