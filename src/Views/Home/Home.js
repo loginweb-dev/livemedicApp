@@ -16,47 +16,11 @@ import { connect } from 'react-redux';
 // UI
 import CardBorderLeft from "../../UI/CardBorderLeft";
 import ClearFix from "../../UI/ClearFix";
+import CallComing from "../../UI/callComing";
+import BackgroundLoading from "../../UI/BackgroundLoading";
 
 // Config
 import { env } from "../../config/env";
-
-const Specialities = [
-    {
-        id: 1,
-        title: 'Medicina Gral.',
-        count: 10,
-        icon: 'car-sport-sharp',
-        borderColor: '#C54125'
-    },
-    {
-        id: 2,
-        title: 'Pediatra',
-        count: 5,
-        icon: 'car-sport-sharp',
-        borderColor: '#32792E'
-    },
-    {
-        id: 3,
-        title: 'Odontólogo',
-        count: 0,
-        icon: 'car-sport-sharp',
-        borderColor: '#C56B00'
-    },
-    {
-        id: 4,
-        title: 'Cardiólogo',
-        count: 6,
-        icon: 'car-sport-sharp',
-        borderColor: '#2A80DB'
-    },
-    {
-        id: 5,
-        title: 'Med. Cirujano',
-        count: 1,
-        icon: 'car-sport-sharp',
-        borderColor: '#3591DF'
-    }
-]
 
 class Home extends Component {
     constructor(props) {
@@ -82,12 +46,30 @@ class Home extends Component {
             });
         })
         .catch(error => ({'error': error}));
+
+        // setTimeout(() => {
+        //     this.props.setCallInfo({
+        //         url: 'https://meet.jit.si/testingloginweb',
+        //         specialist: {
+        //             name: 'Agustin Mejia',
+        //             avatar: 'https://livemedic.net/storage/users/October2020/EIualVR6wGJtY7baF9lq-cropped.png',
+        //             email: 'buddy.m091@gmail.com'
+        //         }
+        //     });
+        //     this.props.setCallInProgress(true);
+        // }, 10000);
     }
 
     render(){
+        if(!this.state.specialities.length){
+            return(
+                <BackgroundLoading/>
+            )
+        }
         return (
             <SafeAreaView style={ styles.container }>
                 <FlatList
+                    style={{ paddingVertical: 10 }}
                     data={this.state.specialities}
                     renderItem={({item, index})=>
                     <CardBorderLeft
@@ -104,7 +86,8 @@ class Home extends Component {
                     numColumns={2}
                 />
                 
-                <ClearFix height={50} />
+                {/* Llamada entrante */}
+                { this.props.callInProgress && <CallComing answerCall={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
             </SafeAreaView>
         )
     }
@@ -112,18 +95,34 @@ class Home extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        paddingTop: 10
-        // flexDirection: 'row',
-        // justifyContent: 'center',
-        // alignItems: 'center',
+        flex: 1
     }
 });
 
 const mapStateToProps = (state) => {
     return {
         authLogin: state.authLogin,
+        callInfo: state.callInfo,
+        callInit: state.callInit,
+        callInProgress: state.callInProgress
     }
 }
 
-export default connect(mapStateToProps)(Home);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        setCallInfo : (callInfo) => dispatch({
+            type: 'SET_CALL_INFO',
+            payload: callInfo
+        }),
+        setCallInit : (callInit) => dispatch({
+            type: 'SET_CALL_INIT',
+            payload: callInit
+        }),
+        setCallInProgress : (callInProgress) => dispatch({
+            type: 'SET_CALL_IN_PROGRESS',
+            payload: callInProgress
+        }),
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
