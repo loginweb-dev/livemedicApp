@@ -74,7 +74,6 @@ class ProfileList extends Component {
                     }
                     numColumns={2}
                 />
-                <Text>hi</Text>
                 {/* Llamada entrante */}
                 { this.props.callInProgress && !this.props.callInit && <CallComing answerCall={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
                 { this.props.callInProgress && this.props.callInit && <CallReturn onPress={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}

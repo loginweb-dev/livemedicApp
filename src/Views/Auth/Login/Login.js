@@ -38,8 +38,8 @@ class Login extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            email: 'admin3@admin.com',
-            password: 'password'
+            email: '',
+            password: ''
         }
         console.log(Token._W)
     }
