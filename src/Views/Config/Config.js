@@ -21,6 +21,10 @@ import TextInputAlt from "../../UI/TextInputAlt";
 import ButtonBlock from "../../UI/ButtonBlock";
 import ClearFix from "../../UI/ClearFix";
 
+// Call coming
+import CallComing from "../../UI/CallComing";
+import CallReturn from "../../UI/CallReturn";
+
 const screenWidth = Math.round(Dimensions.get('window').width);
 const screenHeight = Math.round(Dimensions.get('window').height);
 
@@ -143,6 +147,10 @@ class Config extends Component {
                         <ClearFix height={50} />
                     </ScrollView>
                 </Modal>
+
+                {/* Llamada entrante */}
+                { this.props.callInProgress && !this.props.callInit && <CallComing answerCall={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
+                { this.props.callInProgress && this.props.callInit && <CallReturn onPress={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
             </SafeAreaView>
         )
     }
@@ -183,6 +191,27 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
     return {
         authLogin: state.authLogin,
+        callInfo: state.callInfo,
+        callInit: state.callInit,
+        callInProgress: state.callInProgress
+    }
+}
+
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        setCallInfo : (callInfo) => dispatch({
+            type: 'SET_CALL_INFO',
+            payload: callInfo
+        }),
+        setCallInit : (callInit) => dispatch({
+            type: 'SET_CALL_INIT',
+            payload: callInit
+        }),
+        setCallInProgress : (callInProgress) => dispatch({
+            type: 'SET_CALL_IN_PROGRESS',
+            payload: callInProgress
+        }),
     }
 }
 

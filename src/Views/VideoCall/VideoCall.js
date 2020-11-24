@@ -1,21 +1,17 @@
 import React, { useEffect } from 'react';
+import AsyncStorage from '@react-native-community/async-storage';
 import JitsiMeet, { JitsiMeetView } from 'react-native-jitsi-meet';
+import { connect } from 'react-redux';
 
-function App(props) {
-
-    const Member = {
-        name: props.route.params.callInfo.specialist.name,
-        email: props.route.params.callInfo.specialist.email,
-        avatar: props.route.params.callInfo.specialist.avatar,
-    };
+function VideoCall(props) {
 
     useEffect(() => {
-        setTimeout(() => {
+        setTimeout(async () => {
             const url = props.route.params.callInfo.url;
             const userInfo = {
-                displayName: Member.name ? Member.name : 'Unknown',
-                email: Member.email ? Member.email : 'empresa.loginweb@gmail.com',
-                avatar: Member.avatar ? Member.avatar: 'https://livemedic.net/storage/users/October2020/EIualVR6wGJtY7baF9lq-cropped.png',
+                displayName: props.authLogin.user.name,
+                email: props.authLogin.user.email,
+                avatar: props.authLogin.user.email,
             };
 
             if(url){
@@ -25,28 +21,37 @@ function App(props) {
             }
             /* Você também pode usar o JitsiMeet.audioCall (url) para chamadas apenas de áudio */
             /* Você pode terminar programaticamente a chamada com JitsiMeet.endCall () */
+
+            await AsyncStorage.setItem('SessionCallComing', '');
         }, 1000);
   }, [])
 
   useEffect(() => {
     return () => {
+        props.setCallInit(true);
         JitsiMeet.endCall();
     };
   });
 
     function onConferenceTerminated(nativeEvent) {
         /* Conference terminated event */
-        console.log(nativeEvent)
+        // console.log(nativeEvent)
+        props.setCallInit(true);
+        console.log('terminate')
     }
 
     function onConferenceJoined(nativeEvent) {
         /* Conference joined event */
-        console.log(nativeEvent)
+        // console.log(nativeEvent)
+        props.setCallInit(true);
+        console.log('joined')
     }
 
     function onConferenceWillJoin(nativeEvent) {
         /* Conference will join event */
-        console.log(nativeEvent)
+        // console.log(nativeEvent)
+        props.setCallInit(true);
+        console.log('willjoin')
     }
 
     return (
@@ -62,4 +67,20 @@ function App(props) {
         />
     )
 }
-export default App;
+
+const mapStateToProps = (state) => {
+    return {
+        authLogin: state.authLogin,
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        setCallInit : (callInit) => dispatch({
+            type: 'SET_CALL_INIT',
+            payload: callInit
+        })
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(VideoCall);

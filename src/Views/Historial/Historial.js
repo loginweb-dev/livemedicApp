@@ -4,15 +4,20 @@ import { SafeAreaView,
     View,
     StyleSheet,
     Text,
-    Image,
     Modal,
     Dimensions
 } from 'react-native';
+
+import { connect } from 'react-redux';
 
 // UI
 import CardHistorial from "../../UI/CardHistorial";
 import ClearFix from "../../UI/ClearFix";
 import CardCustomerRounded from "../../UI/CardCustomerRounded";
+
+// Call coming
+import CallComing from "../../UI/CallComing";
+import CallReturn from "../../UI/CallReturn";
 
 // Config
 import { env } from '../../config/env';
@@ -41,7 +46,7 @@ const HistorialList = [
     }
 ];
 
-export default class Historial extends Component {
+class Historial extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -72,7 +77,7 @@ export default class Historial extends Component {
                             />
                         )
                     }
-                    <ClearFix height={50} />
+                    <Text>{this.props.callInProgress}</Text>
                 </ScrollView>
 
                 {/* Modal */}
@@ -86,6 +91,10 @@ export default class Historial extends Component {
 
                     </View>
                 </Modal>
+
+                {/* Llamada entrante */}
+                { this.props.callInProgress && !this.props.callInit && <CallComing answerCall={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
+                { this.props.callInProgress && this.props.callInit && <CallReturn onPress={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
             </SafeAreaView>
         )
     }
@@ -117,3 +126,31 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10
     },
 });
+
+const mapStateToProps = (state) => {
+    return {
+        authLogin: state.authLogin,
+        callInfo: state.callInfo,
+        callInit: state.callInit,
+        callInProgress: state.callInProgress
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        setCallInfo : (callInfo) => dispatch({
+            type: 'SET_CALL_INFO',
+            payload: callInfo
+        }),
+        setCallInit : (callInit) => dispatch({
+            type: 'SET_CALL_INIT',
+            payload: callInit
+        }),
+        setCallInProgress : (callInProgress) => dispatch({
+            type: 'SET_CALL_IN_PROGRESS',
+            payload: callInProgress
+        }),
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Historial);

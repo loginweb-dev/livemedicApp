@@ -17,76 +17,66 @@ import { Rating } from 'react-native-ratings';
 import ButtonBlock from "./ButtonBlock";
 
 const screenWidth = Math.round(Dimensions.get('window').width);
+const screenHeight = Math.round(Dimensions.get('window').height);
 
 export default function CardProfileHorizontal(props) {
     return (
-        <View style={ styles.card }>
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={ styles.cardContainer }>
-                    <ImageBackground
-                        source={{ uri: props.avatar }}
-                        style={{ width: '100%', height: 250 }}
-                    />
-                    <View style={{ margin: 5, flexDirection: 'row' }}>
-                        <View style={{ width: '65%' }}>
-                            <Text style={{ fontSize: 18, color: '#616161' }} numberOfLines={1}>{ props.name }</Text>
-                            <Text style={{ fontSize: 15, color: '#858585' }} numberOfLines={1}>{ props.location }</Text>
-                            <Text style={{ fontSize: 18, color: '#858585' }} numberOfLines={1}>{ props.price } Bs.</Text>
-                        </View>
-                        <View style={{ width: '35%' }}>
-                            <Rating
-                                type='star'
-                                startingValue={props.rating}
-                                readonly
-                                imageSize={20}
-                                style={{ padding: 5, flexDirection: 'row-reverse' }}
-                            />
-                        </View>
-                    </View>
-                    <View style={{flex: 1, alignItems: 'center', marginTop: 10, marginBottom: 20, width: '100%' }}>
-                        {
-                            !props.available &&
-                            <View style={{ alignItems: 'center' }}>
-                                <Text style={{ color: 'red',  textAlign: 'center' }}>No se encuantra disponible ahora, si desea puede programar una cita para otro momento en nuestra página web.</Text>
-                                <TouchableOpacity
-                                    onPress={() => Linking.openURL('https://livemedic.net')}
-                                    style={{ marginTop: 5 }}
-                                >
-                                    <Text style={{ color: '#0D6FAA', fontSize: 16 }}>livemedic.net</Text>
-                                </TouchableOpacity>
-                            </View>
-                        }
-                        {
-                            props.available &&
-                            <ButtonBlock
-                                icon='videocam-outline'
-                                title='Nueva cita ahora'
-                                color='green'
-                                colorText='white'
-                                onPress={ props.onPress }
-                            />
-                        }
-                    </View>
+        <View style={styles.cardContainer} >
+            <ImageBackground
+                source={{ uri: props.avatar }}
+                style={{ width: '100%', height: 250 }}
+            />
+            <View style={{ margin: 5, flexDirection: 'row',  }}>
+                <View style={{ width: '65%' }}>
+                    <Text style={{ fontSize: 18, color: '#616161' }} numberOfLines={1}>{ props.name }</Text>
+                    <Text style={{ fontSize: 15, color: '#858585' }} numberOfLines={1}>{ props.location }</Text>
+                    <Text style={{ fontSize: 18, color: '#858585' }} numberOfLines={1}>{ props.price } Bs.</Text>
                 </View>
-            </ScrollView>
+                <View style={{ width: '35%' }}>
+                    <Rating
+                        type='star'
+                        startingValue={props.rating}
+                        readonly
+                        imageSize={20}
+                        style={{ padding: 5, flexDirection: 'row-reverse' }}
+                    />
+                </View>
+            </View>
+            <View style={{ margin: 5,  }}>
+                <Text style={{ color: '#858585' }}>{props.description}</Text>
+            </View>
+            <View style={{ alignItems: 'center', position: 'absolute', bottom: 0 }}>
+                {
+                    !props.available &&
+                    <View style={{ alignItems: 'center' }}>
+                        <Text style={{ color: 'red',  textAlign: 'center' }}>No se encuantra disponible ahora, si desea puede programar una cita para otro momento en nuestra página web.</Text>
+                        <TouchableOpacity
+                            onPress={() => Linking.openURL('https://livemedic.net')}
+                            style={{ marginTop: 5 }}
+                        >
+                            <Text style={{ color: '#0D6FAA', fontSize: 16 }}>livemedic.net</Text>
+                        </TouchableOpacity>
+                    </View>
+                }
+                {
+                    props.available &&
+                    <ButtonBlock
+                        icon='videocam-outline'
+                        title='Nueva cita ahora'
+                        color='green'
+                        colorText='white'
+                        onPress={ props.onPress }
+                        style={{ width: screenWidth, marginBottom: 0, paddingVertical: 5 }}
+                    />
+                }
+            </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    card: {
-        flex: 1,
-        alignItems: 'center',
-        width: screenWidth,
-        backgroundColor: 'white',
-    },
     cardContainer: {
-        borderBottomWidth: 0,
-        shadowColor: '#ddd',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
-        width: '100%',
-        marginBottom: 10
+        flex: 1,
+        backgroundColor: 'white'
     }
 });

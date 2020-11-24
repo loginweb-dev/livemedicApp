@@ -26,7 +26,11 @@ function CallComing(props) {
                 onPress: () => console.log("Cancel Pressed"),
                 style: "cancel"
                 },
-                { text: "Desviar", onPress: () => console.log("OK Pressed") }
+                { text: "Desviar", onPress: () => {
+                    props.setCallInfo({});
+                    props.setCallInit(false);
+                    props.setCallInProgress(false);
+                } }
             ],
             { cancelable: false }
         );
@@ -38,7 +42,7 @@ function CallComing(props) {
                 style={{ width: 150, height: 150, marginBottom: 10, borderRadius: 75, borderWidth: 5, borderColor: '#579FD0' }}
                 source={{ uri: props.callInfo.specialist ? props.callInfo.specialist.avatar : 'https://livemedic.net/storage/users/October2020/EIualVR6wGJtY7baF9lq-cropped.png' }}
             />
-            <Text style={{ fontSize: 25, color: 'white' }}>{ props.callInfo.specialist ? props.callInfo.specialist.name : 'Unknown' }</Text>
+            <Text style={{ fontSize: 25, color: 'white', marginHorizontal: 20 }} numberOfLines={1}>{ props.callInfo.specialist ? props.callInfo.specialist.name : 'Unknown' }</Text>
             <Text style={{ color: 'white' }}>Lamada entrante...</Text>
             <View style={{ flexDirection: 'row', marginTop: 10 }}>
                 <ButtonCall
@@ -87,4 +91,21 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps)(CallComing);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        setCallInfo : (callInfo) => dispatch({
+            type: 'SET_CALL_INFO',
+            payload: callInfo
+        }),
+        setCallInit : (callInit) => dispatch({
+            type: 'SET_CALL_INIT',
+            payload: callInit
+        }),
+        setCallInProgress : (callInProgress) => dispatch({
+            type: 'SET_CALL_IN_PROGRESS',
+            payload: callInProgress
+        }),
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(CallComing);

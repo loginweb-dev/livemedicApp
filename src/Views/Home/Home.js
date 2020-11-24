@@ -10,14 +10,16 @@ import {
     TouchableOpacity,
     FlatList
 } from 'react-native';
-
+import AsyncStorage from '@react-native-community/async-storage';
 import { connect } from 'react-redux';
 
 // UI
 import CardBorderLeft from "../../UI/CardBorderLeft";
-import ClearFix from "../../UI/ClearFix";
-import CallComing from "../../UI/callComing";
 import BackgroundLoading from "../../UI/BackgroundLoading";
+
+// Call coming
+import CallComing from "../../UI/CallComing";
+import CallReturn from "../../UI/CallReturn";
 
 // Config
 import { env } from "../../config/env";
@@ -30,34 +32,42 @@ class Home extends Component {
         }
     }
 
-    componentDidMount(){
-        let headers = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'accept': 'application/json',
-                    'Authorization': `Bearer ${this.props.authLogin.token}`
-                },
+    async componentDidMount(){
+        const SessionCallComing = await AsyncStorage.getItem('SessionCallComing');
+        if(SessionCallComing){
+            try {
+                let info = JSON.parse(SessionCallComing);
+                this.props.setCallInfo({
+                    url: info.url,
+                    specialist: {
+                        name: info.specialistName,
+                        avatar: info.specialistAvatar
+                    }
+                });
+                this.props.setCallInProgress(true);
+                this.props.navigation.navigate('VideoCall', {callInfo: info});
+            } catch (error) {
+                console.log(error)
             }
+        }
+
+        let headers = {
+            headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json',
+                'Authorization': `Bearer ${this.props.authLogin.token}`
+            },
+        }
         fetch(`${env.API}/api/index`, headers)
         .then(res => res.json())
         .then(res => {
-            this.setState({
-                specialities: res.specialities
-            });
+            if(!res.message && !res.error){
+                this.setState({
+                    specialities: res.specialities
+                });
+            }
         })
         .catch(error => ({'error': error}));
-
-        // setTimeout(() => {
-        //     this.props.setCallInfo({
-        //         url: 'https://meet.jit.si/testingloginweb',
-        //         specialist: {
-        //             name: 'Agustin Mejia',
-        //             avatar: 'https://livemedic.net/storage/users/October2020/EIualVR6wGJtY7baF9lq-cropped.png',
-        //             email: 'buddy.m091@gmail.com'
-        //         }
-        //     });
-        //     this.props.setCallInProgress(true);
-        // }, 10000);
     }
 
     render(){
@@ -85,9 +95,11 @@ class Home extends Component {
                     }
                     numColumns={2}
                 />
-                
+
                 {/* Llamada entrante */}
-                { this.props.callInProgress && <CallComing answerCall={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
+                { this.props.callInProgress && !this.props.callInit && <CallComing answerCall={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
+                { this.props.callInProgress && this.props.callInit && <CallReturn onPress={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
+            
             </SafeAreaView>
         )
     }

@@ -11,14 +11,20 @@ import {
     FlatList
 } from 'react-native';
 
+import { connect } from 'react-redux';
+
 // UI
 import CardProfile from "../../UI/CardProfile";
 import ClearFix from "../../UI/ClearFix";
 
+// Call coming
+import CallComing from "../../UI/CallComing";
+import CallReturn from "../../UI/CallReturn";
+
 // Config
 import { env } from "../../config/env";
 
-export default class ProfileList extends Component {
+class ProfileList extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -36,12 +42,13 @@ export default class ProfileList extends Component {
                         var count = 0;
                         item.appointments.map(appointment => {
                             if(appointment.rating.length){
-                                rating += appointment.rating[0].rating;
+                                rating += parseFloat(appointment.rating[0].rating);
                                 count++;
                             }
-                        })
+                        });
 
-                        if(rating){
+                        // Calcular rating
+                        if(rating && count){
                             rating = rating / count;
                         }
 
@@ -58,7 +65,8 @@ export default class ProfileList extends Component {
                                     specialist: item,
                                     avatar: `${env.API}/storage/${item.user.avatar}`,
                                     rating: rating,
-                                    price: this.props.route.params.speciality.price
+                                    price: this.props.route.params.speciality.price,
+                                    specialityId: this.props.route.params.speciality.id
                                 })}
                             />
                         )
@@ -66,6 +74,10 @@ export default class ProfileList extends Component {
                     }
                     numColumns={2}
                 />
+                <Text>hi</Text>
+                {/* Llamada entrante */}
+                { this.props.callInProgress && !this.props.callInit && <CallComing answerCall={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
+                { this.props.callInProgress && this.props.callInit && <CallReturn onPress={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
             </SafeAreaView>
         )
     }
@@ -75,8 +87,32 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: 10
-        // flexDirection: 'row',
-        // justifyContent: 'center',
-        // alignItems: 'center',
     }
 });
+
+const mapStateToProps = (state) => {
+    return {
+        callInfo: state.callInfo,
+        callInit: state.callInit,
+        callInProgress: state.callInProgress
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        setCallInfo : (callInfo) => dispatch({
+            type: 'SET_CALL_INFO',
+            payload: callInfo
+        }),
+        setCallInit : (callInit) => dispatch({
+            type: 'SET_CALL_INIT',
+            payload: callInit
+        }),
+        setCallInProgress : (callInProgress) => dispatch({
+            type: 'SET_CALL_IN_PROGRESS',
+            payload: callInProgress
+        }),
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ProfileList);

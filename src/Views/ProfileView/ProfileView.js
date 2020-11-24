@@ -10,6 +10,9 @@ import {
     TouchableOpacity,
     Modal
 } from 'react-native';
+
+import { connect } from 'react-redux';
+
 import Icon from 'react-native-vector-icons/Ionicons';
 import { CreditCardInput, LiteCreditCardInput } from "react-native-credit-card-input";
 import { Collapse,CollapseHeader, CollapseBody, AccordionList } from 'accordion-collapse-react-native';
@@ -17,6 +20,14 @@ import RadioForm from 'react-native-simple-radio-button';
 
 // UI
 import ButtonBlock from "../../UI/ButtonBlock";
+
+// Call coming
+import CallComing from "../../UI/CallComing";
+import CallReturn from "../../UI/CallReturn";
+import OverlayLoading from "../../UI/OverlayLoading";
+
+// Config
+import { env } from "../../config/env";
 
 
 var stripe = require('stripe-client')('sk_test_51HmVTICtBx49MJCtYxRv7wzu92XWkOeXX58B9RA8EPA6cNJlKBUfC43gQc7qdh74jyKzKzFC2EplrNc1t7SkQe0J007a7V0IHx');
@@ -41,16 +52,6 @@ const LabelRadioButton = (props) => {
     );
 }
 
-var radio_props = [
-    {
-        label: <LabelRadioButton number='1213123123' nameBank='Banco unión' nameUser='Juan Perez P.' />,
-        value: 0 },
-    {
-        label: <LabelRadioButton number='4234543533' nameBank='Banco Ganadero' nameUser='Jorge Mendez P.' />,
-        value: 1
-    }
-];
-
 // UI
 import CardProfileHorizontal from "../../UI/CardProfileHorizontal";
 import ClearFix from "../../UI/ClearFix";
@@ -59,16 +60,45 @@ import AlertGradient from "../../UI/AlertGradient";
 const screenWidth = Math.round(Dimensions.get('window').width);
 const screenHeight = Math.round(Dimensions.get('window').height);
 
-export default class ProfileView extends Component {
+class ProfileView extends Component {
     constructor(props) {
         super(props);
         this.state = {
             specialist: this.props.route.params.specialist,
+            paymentAccounts: [],
             paymentModal: false,
             successModal: false,
+            errorModal: false,
             collapseStatus: [true, false, false],
+            radioProps: [],
             accountSeleted: 0,
-            PaymentCreditCardValid: false
+            PaymentCreditCardValid: false,
+            // Params for request
+            price_add: 0,
+            payment_type: 2,
+            payment_account_id: null,
+            observations: '',
+            loading: false
+        }
+    }
+
+    async componentDidMount(){
+        let res = await fetch(`${env.API}/api/payment_accounts`)
+        .then(res => res.json())
+        .then(res => res)
+        .catch(error => ({'error': error}));
+
+        if(!res.error){
+            let radioProps = [];
+            let count = 0;
+            res.paymentAccounts.map(account => {
+                radioProps.push({
+                    label: <LabelRadioButton number={ account.number } nameBank={ account.title } nameUser={ account.name } />,
+                    value: count
+                });
+                count++;
+            });
+            this.setState({radioProps, paymentAccounts: res.paymentAccounts});
         }
     }
 
@@ -79,23 +109,78 @@ export default class ProfileView extends Component {
     };
 
     async sendPaymentCreditCad() {
+
         // var card = await stripe.createToken(information);
         // var token = card.id;
         this.setState({
             paymentModal: false,
-            successModal: true
+            loading: true
         });
+
+        // Get current date and hour
+        let dateTime = new Date();
+        let date = `${dateTime.getFullYear()}-${String(dateTime.getMonth()+1).padStart(2, "0")}-${String(dateTime.getDate()).padStart(2, "0")}`;
+        let start = `${String(dateTime.getHours()).padStart(2, "0")}:${String(dateTime.getMinutes()+1).padStart(2, "0")}`;
+
+        let params = {
+            date,
+            start,
+            speciality_id: this.props.route.params.specialityId,
+            price: this.props.route.params.price,
+            price_add: this.state.price_add,
+            ajax: 1,
+            specialist_id: this.props.route.params.specialist.id,
+            customer_id: this.props.authLogin.user.customer.id,
+            payment_type: this.state.payment_type,
+            payment_account_id: this.state.paymentAccounts[this.state.accountSeleted].id,
+            observations: 'nnnnnnn'
+        }
+
+        let headers = {
+            method: 'POST',
+            body: JSON.stringify(params),
+            headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json',
+                'Authorization': `Bearer ${this.props.authLogin.token}`
+            },
+        }
+        
+        let res = await fetch(`${env.API}/api/appointment/store`, headers)
+        .then(res => res.json())
+        .then(res => res)
+        .catch(error => ({'error': error}));
+
+        if(res.success){
+            this.setState({
+                successModal: true,
+                loading: false
+            });
+        }else{
+            this.setState({
+                errorModal: true,
+                loading: false
+            });
+        }
+
+        
     }
 
 
 
     collapseTabs(index, isCollapsed){
+
+        let payment_types = [2, 1];
+
         if(isCollapsed){
             var collapseStatus = [];
             for (let i = 0; i < 3; i++) {
                 collapseStatus[i] = i == index ? true : false;
             }
-            this.setState({collapseStatus})
+            this.setState({
+                collapseStatus,
+                payment_type: payment_types[index]
+            })
         }
         this.setState({
             PaymentCreditCardValid: false
@@ -112,6 +197,7 @@ export default class ProfileView extends Component {
                     price={this.props.route.params.price}
                     rating={this.props.route.params.rating}
                     available={this.state.specialist.status}
+                    description={this.state.specialist.description}
                     onPress={() => this.setState({paymentModal: true})}
                 />
                 {/* Modal payment */}
@@ -172,7 +258,7 @@ export default class ProfileView extends Component {
                                     <View style={{ borderWidth: 1, borderColor: '#E6E6E6', padding: 10 }}>
                                         <View style={{ marginVertical: 10, alignItems: 'center' }}>
                                             <RadioForm
-                                                radio_props={radio_props}
+                                                radio_props={this.state.radioProps}
                                                 initial={ this.state.accountSeleted }
                                                 onPress={ value => {this.setState({accountSeleted: value})}}
                                                 animation={true}
@@ -203,7 +289,9 @@ export default class ProfileView extends Component {
                     </View>
                 </Modal>
 
-                {/* Modal payment */}
+
+
+                {/* Modal success */}
                 <Modal
                     animationType="slide"
                     visible={this.state.successModal}
@@ -224,6 +312,34 @@ export default class ProfileView extends Component {
                         />
                     </View>
                 </Modal>
+
+                {/* Modal error */}
+                <Modal
+                    animationType="slide"
+                    visible={this.state.errorModal}
+                    height={screenHeight}
+                    onRequestClose={()=> this.setState({errorModal: false})}
+                >
+                    <View style={ styles.successContent }>
+                        <Icon name='close-circle-outline' size={100} color='#DB3C3C' />
+                        <Text style={{ fontSize: 30, color: '#767676' }}>Error!</Text>
+                        <Text style={{ color: '#767676', textAlign: 'center' }}>Ocurrió un error inesperado, intenta nuevamente!.</Text>
+                        <ButtonBlock
+                            icon='arrow-back-circle-outline'
+                            title='Volver'
+                            color='#DB3C3C'
+                            colorText='white'
+                            style={{ marginVertical: 20 }}
+                            onPress={ () => this.setState({ errorModal: false }) }
+                        />
+                    </View>
+                </Modal>
+
+                {/* Llamada entrante */}
+                { this.props.callInProgress && !this.props.callInit && <CallComing answerCall={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
+                { this.props.callInProgress && this.props.callInit && <CallReturn onPress={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
+
+                { this.state.loading && <OverlayLoading/>}
             </SafeAreaView>
         )
     }
@@ -255,3 +371,31 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     }
 });
+
+const mapStateToProps = (state) => {
+    return {
+        authLogin: state.authLogin,
+        callInfo: state.callInfo,
+        callInit: state.callInit,
+        callInProgress: state.callInProgress
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        setCallInfo : (callInfo) => dispatch({
+            type: 'SET_CALL_INFO',
+            payload: callInfo
+        }),
+        setCallInit : (callInit) => dispatch({
+            type: 'SET_CALL_INIT',
+            payload: callInit
+        }),
+        setCallInProgress : (callInProgress) => dispatch({
+            type: 'SET_CALL_IN_PROGRESS',
+            payload: callInProgress
+        }),
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ProfileView);

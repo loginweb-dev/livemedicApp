@@ -13,6 +13,7 @@ import { showMessage } from "react-native-flash-message";
 
 // Firebase
 import auth from '@react-native-firebase/auth';
+import messaging from '@react-native-firebase/messaging';
 import { LoginManager, AccessToken } from 'react-native-fbsdk';
 import { GoogleSignin } from '@react-native-community/google-signin';
 
@@ -31,6 +32,8 @@ GoogleSignin.configure({
     forceCodeForRefreshToken: true,
 });
 
+const Token = messaging().getToken().then(token => token);
+
 class Login extends Component {
     constructor(props) {
         super(props);
@@ -38,6 +41,7 @@ class Login extends Component {
             email: 'admin3@admin.com',
             password: 'password'
         }
+        console.log(Token._W)
     }
 
     onFacebookButtonPress = async () => {
@@ -61,15 +65,16 @@ class Login extends Component {
             .then(res => res)
             .catch(error => ({'error': error}));
 
-            let paramans = {
+            let params = {
                 name: userInfo.name,
                 email: userInfo.email ? userInfo.email : `${userInfo.id}@loginweb.dev`,
                 avatar: `http://graph.facebook.com/${userInfo.id}/picture?type=large`,
                 password: strRandom(10),
+                firebase_token: Token._W,
                 social_login: 'facebook'
             }
 
-            this.handleLogin(paramans);
+            this.handleLogin(params);
 
         })
     }
@@ -78,15 +83,16 @@ class Login extends Component {
         try {
             await GoogleSignin.hasPlayServices();
             const userInfo = await GoogleSignin.signIn();
-            let paramans = {
+            let params = {
                 name: userInfo.user.givenName,
                 last_name: userInfo.user.familyName,
                 email: userInfo.user.email,
                 avatar: userInfo.user.photo,
                 password: strRandom(10),
+                firebase_token: Token._W,
                 social_login: 'google'
             };
-            this.handleLogin(paramans);
+            this.handleLogin(params);
 
         } catch (error) {
             console.log(error)
@@ -94,14 +100,15 @@ class Login extends Component {
     }
 
     async manualLogin(){
-        let paramans = {
+        let params = {
             email: this.state.email,
-            password: this.state.password
+            password: this.state.password,
+            firebase_token: Token._W,
         };
 
         let req = await fetch(`${env.API}/api/auth/login`, {
             method: 'POST',
-            body: JSON.stringify(paramans),
+            body: JSON.stringify(params),
             headers:{
                 'Content-Type': 'application/json',
                 'accept': 'application/json'
@@ -109,13 +116,13 @@ class Login extends Component {
         }).then(res => res.json())
         .catch(error => ({'error': error}));
 
-        this.handleLogin(paramans);
+        this.handleLogin(params);
     }
 
-    async handleLogin(paramans){
+    async handleLogin(params){
         let req = await fetch(`${env.API}/api/auth/login`, {
             method: 'POST',
-            body: JSON.stringify(paramans),
+            body: JSON.stringify(params),
             headers:{
                 'Content-Type': 'application/json',
                 'accept': 'application/json'
@@ -125,7 +132,7 @@ class Login extends Component {
 
         if(req.user){
             this.props.setUser(req);
-            AsyncStorage.setItem('SessionUser', JSON.stringify(req));
+            AsyncStorage.setItem('SessionAuthLogin', JSON.stringify(req));
             this.props.navigation.reset({
                 index: 0,
                 routes: [{ name: 'TabMenu' }],

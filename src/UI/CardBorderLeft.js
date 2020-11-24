@@ -4,11 +4,22 @@ import {
     StyleSheet,
     Text,
     Dimensions,
-    TouchableOpacity
+    TouchableOpacity,
+    ToastAndroid
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const screenWidth = Math.round(Dimensions.get('window').width);
+
+const AlertEmpty = () => {
+    ToastAndroid.showWithGravityAndOffset(
+        'No existen especialistas disponibles',
+        ToastAndroid.LONG,
+        ToastAndroid.BOTTOM,
+        25,
+        50
+    );
+}
 
 export default function CardBorderLeft(props) {
 
@@ -44,7 +55,7 @@ export default function CardBorderLeft(props) {
             <View style={ [styles.cardContainer, { borderLeftColor: carColor ? carColor : 'black' }] }>
                 <TouchableOpacity
                     style={{ flexDirection: 'row' }}
-                    onPress={props.onPress}
+                    onPress={props.count ? props.onPress : AlertEmpty}
                 >
                     <View style={{ width: '85%' }}>
                         <Text style={{ fontSize: 20, color: carColor ? carColor : 'black' }} numberOfLines={1}>{ props.title }</Text>

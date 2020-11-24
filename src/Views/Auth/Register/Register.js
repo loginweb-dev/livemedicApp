@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 
 import AsyncStorage from '@react-native-community/async-storage';
+import messaging from '@react-native-firebase/messaging';
 import { showMessage } from "react-native-flash-message";
 import { connect } from 'react-redux';
 
@@ -19,6 +20,8 @@ import ClearFix from "../../../UI/ClearFix";
 
 // Config
 import { env, strRandom } from "../../../config/env";
+
+const Token = messaging().getToken().then(token => token._W);
 
 class Register extends Component {
     constructor(props) {
@@ -49,7 +52,8 @@ class Register extends Component {
             phones: this.state.phones,
             email: this.state.email,
             password: this.state.password,
-            password_repeat: this.state.password_repeat
+            password_repeat: this.state.password_repeat,
+            firebase_token: Token,
         }
 
         // Validar longitud del password
@@ -87,7 +91,7 @@ class Register extends Component {
 
             if(req.user){
                 this.props.setUser(req);
-                AsyncStorage.setItem('SessionUser', JSON.stringify(req));
+                AsyncStorage.setItem('SessionAuthLogin', JSON.stringify(req));
                 this.props.navigation.reset({
                     index: 0,
                     routes: [{ name: 'TabMenu' }],
