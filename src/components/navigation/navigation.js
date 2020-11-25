@@ -146,22 +146,17 @@ return (
         {/* Menu */}
         {
             showMenu &&
-            <DropDownMenu>
-            <TouchableOpacity onPress={ () => handleMenu(false)} style={{ height: 40 }}>
-                <View style={{ height: 30 }}>
-                <Text style={{ fontSize: 16, fontWeight: 'bold' }}><Icon name="help-circle-outline" size={15} /> Ayuda</Text>
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={ () => { handleAlert(true); handleMenu(false) } } style={{ height: 40 }}>
-                <View style={{  }}>
-                <Text style={{ fontSize: 16, fontWeight: 'bold' }}><Icon name="exit-outline" size={15} /> Salir</Text>
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={ () => handleMenu(false)}>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 5 }}>
-                <Text>Cerrar <Icon name="close-circle-outline" size={15} />  </Text>
-                </View>
-            </TouchableOpacity>
+            <DropDownMenu onPress={ () => handleMenu(false)}>
+                <TouchableOpacity onPress={ () => handleMenu(false)} style={{ height: 40 }}>
+                    <View style={{ height: 30 }}>
+                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}><Icon name="help-circle-outline" size={15} /> Ayuda</Text>
+                    </View>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={ () => { handleAlert(true); handleMenu(false) } } style={{ height: 40 }}>
+                    <View style={{  }}>
+                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}><Icon name="exit-outline" size={15} /> Salir</Text>
+                    </View>
+                </TouchableOpacity>
             </DropDownMenu>
         }
 

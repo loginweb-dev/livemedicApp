@@ -4,7 +4,8 @@ import {
     StyleSheet,
     Text,
     Image,
-    Dimensions
+    Dimensions,
+    TouchableOpacity,
 } from 'react-native';
 
 const screenWidth = Math.round(Dimensions.get('window').width);
@@ -12,14 +13,22 @@ const screenHeight = Math.round(Dimensions.get('window').height);
 
 export default function DropDownMenu(props) {
     return (
-        <View style={ [styles.cardContainer] }>
-            {props.children}
-        </View>
+        <TouchableOpacity onPress={ props.onPress } style={ styles.container }>
+            <View style={ [styles.optionsList] }>
+                {props.children}
+            </View>
+        </TouchableOpacity>
     );
 }
 
 const styles = StyleSheet.create({
-    cardContainer: {
+    container: {
+        width: screenWidth,
+        height: screenHeight,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        position: 'absolute'
+    },
+    optionsList: {
         width: 200,
         position: 'absolute',
         top: 0,
