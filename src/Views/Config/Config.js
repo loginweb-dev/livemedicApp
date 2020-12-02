@@ -16,7 +16,7 @@ import { showMessage } from "react-native-flash-message";
 import { connect } from 'react-redux';
 
 // UI
-import Card from "../../UI/Card";
+import CardSimple from "../../UI/CardSimple";
 import TextInputAlt from "../../UI/TextInputAlt";
 import ButtonBlock from "../../UI/ButtonBlock";
 import ClearFix from "../../UI/ClearFix";
@@ -24,6 +24,9 @@ import ClearFix from "../../UI/ClearFix";
 // Call coming
 import CallComing from "../../UI/CallComing";
 import CallReturn from "../../UI/CallReturn";
+
+// Configurations
+import { env } from '../../config/env.js';
 
 const screenWidth = Math.round(Dimensions.get('window').width);
 const screenHeight = Math.round(Dimensions.get('window').height);
@@ -38,11 +41,30 @@ class Config extends Component {
             address: this.props.authLogin.user.customer.address,
             email: this.props.authLogin.user.email,
             avatar: this.props.authLogin.user.avatar,
-            formShow: false
+            formShow: false,
+            historial: this.props.historial,
+            countPrescription: 0,
+            countAnalysis: 0
         }
     }
 
+    componentDidMount(){
+        let countPrescription = 0;
+        let countAnalysis = 0;
+        this.state.historial.map(historial => {
+            countPrescription += historial.prescription.length;
+            countAnalysis += historial.analysis.length;
+        });
+        this.setState({
+            countPrescription, countAnalysis
+        });
+    }
+
     submitForm = () => {
+        let params = {
+
+        }
+
         showMessage({
             message: "Perfil actualizado",
             description: "Sus Datos han sido actualizados.",
@@ -56,7 +78,7 @@ class Config extends Component {
         return (
             <SafeAreaView style={ styles.container }>
                 <ScrollView showsVerticalScrollIndicator={false} style={{ paddingVertical: 10 }}>
-                    <Card>
+                    <CardSimple>
                         <TouchableOpacity onPress={ () => this.setState({formShow: true}) }>
                             <View style={ [styles.cardContainer] }>
                                 <View style={{ width: '40%', flex: 1 }}>
@@ -76,11 +98,11 @@ class Config extends Component {
                             </View>
                         </TouchableOpacity>
                         <View style={ [styles.cardContainer, { marginTop: 20, borderTopColor: '#F5F5F5', borderTopWidth: 2, paddingTop: 10 } ] }>
-                            <Counter amount='12' label='Citas médicas' />
-                            <Counter amount='6' label='Recetas' />
-                            <Counter amount='4' label='Laboratorios' />
+                            <Counter amount={ this.state.historial.length } label='Citas médicas' />
+                            <Counter amount={ this.state.countPrescription } label='Recetas' />
+                            <Counter amount={ this.state.countAnalysis } label='Laboratorios' />
                         </View>
-                    </Card>
+                    </CardSimple>
                     <ClearFix height={50} />
                 </ScrollView>
 
@@ -136,10 +158,11 @@ class Config extends Component {
                             />
                             <View style={{ margin: 20, marginTop: 30 }}>
                                 <ButtonBlock
-                                    title='Editar'
+                                icon='save-outline'
+                                    title='Guardar cambios'
                                     color='white'
-                                    borderColor='#3b5998'
-                                    colorText='#3b5998'
+                                    borderColor={ env.color.primary }
+                                    colorText={ env.color.primary }
                                     onPress={ this.submitForm }
                                 />
                             </View>
@@ -193,7 +216,8 @@ const mapStateToProps = (state) => {
         authLogin: state.authLogin,
         callInfo: state.callInfo,
         callInit: state.callInit,
-        callInProgress: state.callInProgress
+        callInProgress: state.callInProgress,
+        historial: state.historial
     }
 }
 

@@ -41,7 +41,6 @@ class Login extends Component {
             email: '',
             password: ''
         }
-        console.log(Token._W)
     }
 
     onFacebookButtonPress = async () => {
@@ -152,7 +151,7 @@ class Login extends Component {
         return (
             <SafeAreaView style={styles.container}>
                 <BackgroundColor
-                    title='Login'
+                    title='Inicio de sesión'
                     backgroundColor='transparent'
                 />
                 <ScrollView style={{ paddingTop: 20 }} showsVerticalScrollIndicator={false}>
@@ -175,8 +174,8 @@ class Login extends Component {
                             <ButtonBlock
                                 title='Iniciar sesión'
                                 color='white'
-                                borderColor='#3b5998'
-                                colorText='#3b5998'
+                                borderColor={ env.color.primary }
+                                colorText={ env.color.primary }
                                 onPress={() => this.manualLogin()}
                             />
                         </View>
@@ -199,7 +198,7 @@ class Login extends Component {
                             <ButtonBlock
                                 title='Registrarse'
                                 color='transparent'
-                                colorText='#45A4C0'
+                                colorText={ env.color.primary }
                                 style={{ marginTop: 15 }}
                                 onPress={() => this.props.navigation.navigate('Register')}
                             />
@@ -214,7 +213,7 @@ class Login extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#2A80DB'
+        backgroundColor: env.color.primary
     },
     form:{
         paddingTop: 20,

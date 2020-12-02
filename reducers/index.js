@@ -4,6 +4,7 @@ const reducerApp = (
             callInfo: {},
             callInProgress: false,
             callInit: false,
+            historial: []
         }, action
     ) => {
     switch (action.type) {
@@ -15,6 +16,8 @@ const reducerApp = (
             return {...state, callInit: action.payload};
         case 'SET_CALL_IN_PROGRESS':
             return {...state, callInProgress: action.payload};
+        case 'SET_HISTORIAL':
+            return {...state, historial: action.payload};
         default:
             return state;
     }

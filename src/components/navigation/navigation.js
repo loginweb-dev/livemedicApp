@@ -37,6 +37,9 @@ import auth from '@react-native-firebase/auth';
 import { LoginManager } from 'react-native-fbsdk';
 import messaging from '@react-native-firebase/messaging';
 
+// Configurations
+import { env } from '../../config/env.js';
+
 const Stack = createStackNavigator();
 
 function Navigation(props) {
@@ -89,8 +92,8 @@ return (
             <Stack.Screen
                 name="SplashScreen" component={SplashScreen}
                 options={{
-                title: '',
-                headerTransparent: true,
+                    title: '',
+                    headerTransparent: true,
                 }}
             />
             <Stack.Screen
@@ -129,8 +132,8 @@ return (
             <Stack.Screen
                 name="TabMenu" component={TabMenu}
                 options={{
-                title: 'LiveMedic',
-                headerTitle: props => <LogoTitle />,
+                    title: env.appName,
+                    headerTitle: props => <LogoTitle />,
                     headerRight: () => (
                     <TouchableOpacity
                         style={{ marginRight: 10 }}
@@ -139,6 +142,13 @@ return (
                         <Icon name="ellipsis-vertical-sharp" size={30} />
                     </TouchableOpacity>
                     ),
+                    headerStyle: {
+                        backgroundColor: env.color.primary,
+                    },
+                    headerTintColor: '#fff',
+                    headerTitleStyle: {
+                        fontWeight: 'bold',
+                    },
                 }}
                 independent={true}
             />
@@ -188,7 +198,7 @@ function LogoTitle() {
                 style={{ width: 40, height: 40 }}
                 source={ require('../../assets/images/icon.png') }
             />
-            <Text style={{ marginLeft: 15, fontSize: 25 }}>LiveMedic</Text>
+            <Text style={{ marginLeft: 15, fontSize: 25, marginTop: 5 }}>{env.appName}</Text>
         </View>
     );
 }
@@ -199,7 +209,7 @@ function TabMenu() {
   return (
     <Tab.Navigator
         tabBarOptions={{
-          activeTintColor: '#45A4C0',
+          activeTintColor: env.color.primary,
           inactiveTintColor: 'gray',
         }}
     >

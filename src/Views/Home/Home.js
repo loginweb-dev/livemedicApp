@@ -16,6 +16,7 @@ import { connect } from 'react-redux';
 // UI
 import CardBorderLeft from "../../UI/CardBorderLeft";
 import BackgroundLoading from "../../UI/BackgroundLoading";
+import HeaderInfo from "../../UI/HeaderInfo";
 
 // Call coming
 import CallComing from "../../UI/CallComing";
@@ -78,6 +79,9 @@ class Home extends Component {
         }
         return (
             <SafeAreaView style={ styles.container }>
+                <HeaderInfo title='Elige la especialidad'>
+                    Presiona sobre el nombre de la especialidad con la necesita ser atendido.
+                </HeaderInfo>
                 <FlatList
                     style={{ paddingVertical: 10 }}
                     data={this.state.specialities}

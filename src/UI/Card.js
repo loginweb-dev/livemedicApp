@@ -1,33 +1,19 @@
 import React from 'react';
 import {
-    View,
-    StyleSheet,
-    Text,
-    Image
+    View, Text
 } from 'react-native';
+
 
 export default function Card(props) {
     return (
-        <View style={ [styles.cardContainer] }>
-            {props.children}
+        <View style={{ borderWidth: 1, borderColor: props.color ? props.color : '#ddd', borderRadius: 5, marginVertical: 10 }}>
+            <View style={{ paddgin: 10, backgroundColor: props.color ? props.color : '#ddd' }}>
+                <Text style={{ padding: 10, color: props.textColor ? props.textColor : '#000' }}>{ props.title }</Text>
+            </View>
+
+            <View style={{ padding: 10 }}>
+                { props.children }
+            </View>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    cardContainer: {
-        borderWidth: 1,
-        borderBottomWidth: 0,
-        backgroundColor: 'white',
-        shadowColor: '#ddd',
-        shadowOffset: { width: 0, height: 3 },
-        borderRadius: 2,
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
-        width: '100%',
-        elevation: 3,
-        borderColor: '#ddd',
-        padding: 10,
-        marginBottom: 2
-    }
-});

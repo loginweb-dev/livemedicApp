@@ -1,11 +1,14 @@
 export const env = {
-    appName: "LiveMedic",
+    appName: "LiveMedic Edgley",
     appDescription: "Versión inical de una aplicación que incluye react-navigation y redux.",
     autor: "LoginWeb",
     API: "https://livemedic.net",
     location: {
         latitude: -14.834821,
         longitude: -64.904159,
+    },
+    color: {
+        primary: '#2a95a5'
     }
 }
 

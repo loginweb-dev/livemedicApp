@@ -6,6 +6,8 @@ import {
     Text,
     Image
 } from 'react-native';
+import moment from "moment";
+import 'moment/locale/es';
 
 export default function CardHistorial(props) {
     return (
@@ -19,7 +21,7 @@ export default function CardHistorial(props) {
                 </View>
                 <View style={{ width: '80%' }}>
                     <Text style={{ fontSize: 18, color: 'black' }} numberOfLines={1}>{ props.name }</Text>
-                    <Text style={{ fontSize: 13, color: '#909090', marginTop: 3 }} numberOfLines={2}>{ props.date }</Text>
+                    <Text style={{ fontSize: 13, color: '#909090', marginTop: 3 }} numberOfLines={2}>{ moment(props.date).fromNow() }</Text>
                 </View>
             </View>
         </TouchableOpacity>

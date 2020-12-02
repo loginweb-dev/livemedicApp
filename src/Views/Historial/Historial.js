@@ -9,11 +9,14 @@ import { SafeAreaView,
 } from 'react-native';
 
 import { connect } from 'react-redux';
+import AsyncStorage from '@react-native-community/async-storage';
 
 // UI
 import CardHistorial from "../../UI/CardHistorial";
 import ClearFix from "../../UI/ClearFix";
 import CardCustomerRounded from "../../UI/CardCustomerRounded";
+import BackgroundLoading from "../../UI/BackgroundLoading";
+import AppointmentDetail from "../../UI/AppointmentDetail";
 
 // Call coming
 import CallComing from "../../UI/CallComing";
@@ -25,55 +28,62 @@ import { env } from '../../config/env';
 const screenWidth = Math.round(Dimensions.get('window').width);
 const screenHeight = Math.round(Dimensions.get('window').height);
 
-const HistorialList = [
-    {
-        id: 1,
-        name: 'Dr. Jhoel David Alcocer Guzmán',
-        avatar: 'https://livemedic.net/storage/users/October2020/QEulvV8pirCv4MbS5Ib8-cropped.jpeg',
-        date: 'Hace 1 día'
-    },
-    {
-        id: 2,
-        name: 'Dra. Brisa María Montenegro Gil',
-        avatar: 'https://livemedic.net/storage/users/October2020/ZfBgNQTicFQ5ItVKJ3DN-cropped.jpeg',
-        date: 'Hace 1 mes'
-    },
-    {
-        id: 3,
-        name: 'Dra. Helen Zabala Melgar',
-        avatar: 'https://livemedic.net/storage/users/October2020/p7Q6Gh4iQ8qLhd7obquZ-cropped.jpg',
-        date: 'Hace 3 meses'
-    }
-];
-
 class Historial extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            detailShow: false
+            detailShow: false,
+            appointments: this.props.historial,
+            appointmentDetail: {}
         }
     }
 
-    componentDidMount(){
-        
+    async componentDidMount(){
+        let headers = {
+            headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json',
+                'Authorization': `Bearer ${this.props.authLogin.token}`
+            },
+        }
+        fetch(`${env.API}/api/historial/${this.props.authLogin.user.customer.id}`, headers)
+        .then(res => res.json())
+        .then(res => {
+            if(!res.message && !res.error){
+                this.setState({
+                    appointments: res.appointments
+                }, async () => {
+                    this.props.setHistorial(res.appointments);
+                    await AsyncStorage.setItem('SessionHistorial', JSON.stringify(res.appointments));
+                });
+            }
+        })
+        .catch(error => ({'error': error}));
     }
 
-    showDetailHistorial = () => {
-        // this.setState({detailShow: true});
+    showDetailHistorial(item){
+        this.setState({appointmentDetail: item})
+        this.setState({detailShow: true});
     }
 
     render(){
+        if(!this.state.appointments.length){
+            return(
+                <BackgroundLoading/>
+            )
+        }
+
         return (
             <SafeAreaView style={ styles.container }>
                 <ScrollView showsVerticalScrollIndicator={false} style={{ paddingVertical: 10 }}>
                     {
-                        HistorialList.map(item => 
+                        this.state.appointments.map(item => 
                             <CardHistorial
                                 key={ item.id }
-                                name={ item.name }
-                                avatar={ item.avatar }
-                                date={ item.date }
-                                onPress={this.showDetailHistorial}
+                                name={ item.specialist.full_name }
+                                avatar={ `${env.API}/storage/${item.specialist.user.avatar}` }
+                                date={ item.created_at }
+                                onPress={() => this.showDetailHistorial(item)}
                             />
                         )
                     }
@@ -88,7 +98,7 @@ class Historial extends Component {
                     onRequestClose={()=> this.setState({detailShow: false})}
                 >
                     <View>
-
+                        <AppointmentDetail data={this.state.appointmentDetail}/>
                     </View>
                 </Modal>
 
@@ -132,7 +142,8 @@ const mapStateToProps = (state) => {
         authLogin: state.authLogin,
         callInfo: state.callInfo,
         callInit: state.callInit,
-        callInProgress: state.callInProgress
+        callInProgress: state.callInProgress,
+        historial: state.historial
     }
 }
 
@@ -149,6 +160,10 @@ const mapDispatchToProps = (dispatch) => {
         setCallInProgress : (callInProgress) => dispatch({
             type: 'SET_CALL_IN_PROGRESS',
             payload: callInProgress
+        }),
+        setHistorial : (historial) => dispatch({
+            type: 'SET_HISTORIAL',
+            payload: historial
         }),
     }
 }

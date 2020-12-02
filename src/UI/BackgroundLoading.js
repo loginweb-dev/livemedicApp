@@ -8,7 +8,7 @@ export default function BackgroundLoading(){
 
     return (
         <View style={ style.container }>
-            <ActivityIndicator size="large" color="#579FD0" />
+            <ActivityIndicator size="large" color={ env.color.primary } />
             <Text style={{ marginTop: 20 }}>Cargando...</Text>
         </View>
     )

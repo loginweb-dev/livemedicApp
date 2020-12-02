@@ -176,8 +176,8 @@ class Register extends Component {
                             <ButtonBlock
                                 title='Registrarse'
                                 color='white'
-                                borderColor='#3b5998'
-                                colorText='#3b5998'
+                                borderColor={ env.color.primary }
+                                colorText={ env.color.primary }
                                 onPress={ this.handleRegister }
                             />
                         </View>
@@ -192,7 +192,7 @@ class Register extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#2A80DB'
+        backgroundColor: env.color.primary 
     },
     form:{
         paddingTop: 20,

@@ -8,7 +8,8 @@ import {
     ScrollView,
     Dimensions,
     TouchableOpacity,
-    Modal
+    Modal,
+    Linking
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -20,6 +21,8 @@ import RadioForm from 'react-native-simple-radio-button';
 
 // UI
 import ButtonBlock from "../../UI/ButtonBlock";
+import HeaderInfo from "../../UI/HeaderInfo";
+import HyperLink from "../../UI/HyperLink";
 
 // Call coming
 import CallComing from "../../UI/CallComing";
@@ -51,6 +54,7 @@ const LabelRadioButton = (props) => {
         </View>
     );
 }
+var timer = null;
 
 // UI
 import CardProfileHorizontal from "../../UI/CardProfileHorizontal";
@@ -156,6 +160,7 @@ class ProfileView extends Component {
                 successModal: true,
                 loading: false
             });
+            timer = setTimeout( this.closeModalSuccess, 5000);
         }else{
             this.setState({
                 errorModal: true,
@@ -165,8 +170,6 @@ class ProfileView extends Component {
 
         
     }
-
-
 
     collapseTabs(index, isCollapsed){
 
@@ -185,6 +188,16 @@ class ProfileView extends Component {
         this.setState({
             PaymentCreditCardValid: false
         });
+    }
+
+    closeModalSuccess = () => {
+        this.setState({ successModal: false }, () => {
+            this.props.navigation.navigate('TabMenu')
+        })
+    }
+
+    componentWillUnmount() {
+        clearTimeout(timer);
     }
 
     render(){
@@ -208,10 +221,9 @@ class ProfileView extends Component {
                     onRequestClose={()=> this.setState({paymentModal: false})}
                 >
                     <View style={{ flex: 1, marginTop: 10 }}>
-                        <View style={{ alignItems: 'center', margin: 20 }}>
-                            <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#767676', textAlign: 'center' }}>Elige la forma de pago</Text>
-                            <Text style={{ color: '#999999', textAlign: 'center' }}>Para que puedas comunicarte con nuestro especialista debes realizar el pago de la consulta.</Text>
-                        </View>
+                        <HeaderInfo title='Elige la forma de pago'>
+                            Para que puedas comunicarte con nuestro especialista debes realizar el pago de la consulta.
+                        </HeaderInfo>
                         <ScrollView showsVerticalScrollIndicator={false}>
                             {/* Pago con tajeta */}
                             <Collapse isCollapsed={ this.state.collapseStatus[0] } onToggle={ isCollapsed => this.collapseTabs(0, isCollapsed) } >
@@ -272,7 +284,17 @@ class ProfileView extends Component {
                                             header='Instrucciones'
                                             footer='Cualquier reclamo comunicarse con nuestro centro de atención al cliente.'
                                         >
-                                            <Text style={{ color: 'white' }}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat</Text>
+                                            <Text style={{ color: 'white', textAlign: 'center' }}>
+                                                Debes realizar una tranferencia bancaria al número de cuenta seleccionado y posteriormente enviar una captura del comprobante de tranferencia a cualquiera de los siguientes números de Whatsapp:
+                                            </Text>
+                                            <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20}}>
+                                                <HyperLink url='whatsapp://send?phone=59172841731'>
+                                                    +591 72841731
+                                                </HyperLink>
+                                                <HyperLink url='whatsapp://send?phone=59176866169'>
+                                                    +591 76866169
+                                                </HyperLink>
+                                            </View>
                                         </AlertGradient>
                                         <ButtonBlock
                                             icon='checkmark-circle-outline'
@@ -301,14 +323,14 @@ class ProfileView extends Component {
                     <View style={ styles.successContent }>
                         <Icon name='checkmark-circle-outline' size={100} color='green' />
                         <Text style={{ fontSize: 30, color: '#767676' }}>Bien hecho!</Text>
-                        <Text style={{ color: '#767676', textAlign: 'center' }}>En un momento nuestro especualista se comunicará contigo, espera un momento por favor!.</Text>
+                        <Text style={{ color: '#767676', textAlign: 'center' }}>En un momento nuestro especialista se comunicará contigo, aguarda un momento por favor!.</Text>
                         <ButtonBlock
                             icon='arrow-back-circle-outline'
-                            title='Volver'
+                            title='Volver al inicio'
                             color='green'
                             colorText='white'
                             style={{ marginVertical: 20 }}
-                            onPress={ () => this.setState({ successModal: false }) }
+                            onPress={ this.closeModalSuccess }
                         />
                     </View>
                 </Modal>

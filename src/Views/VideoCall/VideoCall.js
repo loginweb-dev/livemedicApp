@@ -16,8 +16,6 @@ function VideoCall(props) {
 
             if(url){
                 JitsiMeet.call(url, userInfo);
-            }else{
-                JitsiMeet.endCall();
             }
             /* Você também pode usar o JitsiMeet.audioCall (url) para chamadas apenas de áudio */
             /* Você pode terminar programaticamente a chamada com JitsiMeet.endCall () */

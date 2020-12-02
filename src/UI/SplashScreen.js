@@ -58,7 +58,7 @@ const style = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        // backgroundColor: Config.color.backgroundSplash,
+        backgroundColor: env.color.primary,
     },
     logo: {
         flexDirection: 'column',
