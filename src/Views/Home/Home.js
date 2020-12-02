@@ -43,7 +43,7 @@ class Home extends Component {
         }
         
         const SessionCallInfo = await AsyncStorage.getItem('SessionCallInfo');
-        if(SessionCallInfo.url){
+        if(SessionCallInfo != '' && SessionCallInfo != '{}'){
             try {
                 let info = JSON.parse(SessionCallInfo);
                 this.props.setCallInfo({
