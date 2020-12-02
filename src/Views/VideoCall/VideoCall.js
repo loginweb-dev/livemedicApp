@@ -2,10 +2,12 @@ import React, { useEffect } from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
 import JitsiMeet, { JitsiMeetView } from 'react-native-jitsi-meet';
 import { connect } from 'react-redux';
+import { stopSampleSound } from  'react-native-notification-sounds';
 
 function VideoCall(props) {
 
     useEffect(() => {
+        stopSampleSound();
         setTimeout(async () => {
             const url = props.route.params.callInfo.url;
             const userInfo = {

@@ -17,6 +17,7 @@ import { connect } from 'react-redux';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import AwesomeAlert from 'react-native-awesome-alerts';
+import NotificationSounds, { playSampleSound } from  'react-native-notification-sounds';
 
 // Views
 import SplashScreen from "../../UI/SplashScreen";
@@ -68,6 +69,10 @@ function Navigation(props) {
                 }
             });
             props.setCallInProgress(true);
+            NotificationSounds.getNotifications('ringtone').then(soundsList  => {
+                // console.warn('SOUNDS', JSON.stringify(soundsList));
+                playSampleSound(soundsList[0]);
+            });
         });
 
     }, []);
