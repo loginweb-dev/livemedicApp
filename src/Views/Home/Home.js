@@ -34,10 +34,18 @@ class Home extends Component {
     }
 
     async componentDidMount(){
-        const SessionCallComing = await AsyncStorage.getItem('SessionCallComing');
-        if(SessionCallComing){
+        let headers = {
+            headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json',
+                'Authorization': `Bearer ${this.props.authLogin.token}`
+            },
+        }
+        
+        const SessionCallInfo = await AsyncStorage.getItem('SessionCallInfo');
+        if(SessionCallInfo.url){
             try {
-                let info = JSON.parse(SessionCallComing);
+                let info = JSON.parse(SessionCallInfo);
                 this.props.setCallInfo({
                     url: info.url,
                     specialist: {
@@ -50,15 +58,26 @@ class Home extends Component {
             } catch (error) {
                 console.log(error)
             }
+        }else{
+            fetch(`${env.API}/api/appointment/active/${this.props.authLogin.user.customer.id}`, headers)
+            .then(res => res.json())
+            .then(res => {
+                if(res.appointment){
+                    this.props.setCallInfo({
+                        url: `${res.server}/Consulta-${res.appointment.code}`,
+                        specialist: {
+                            name: res.appointment.specialist.full_name,
+                            avatar: `${env.API}/storage/${res.appointment.specialist.user.avatar}`
+                        }
+                    });
+                    this.props.setCallInit(true);
+                    this.props.setCallInProgress(true);
+                }
+            })
+            .catch(error => ({'error': error}));
         }
 
-        let headers = {
-            headers: {
-                'Content-Type': 'application/json',
-                'accept': 'application/json',
-                'Authorization': `Bearer ${this.props.authLogin.token}`
-            },
-        }
+        
         fetch(`${env.API}/api/index`, headers)
         .then(res => res.json())
         .then(res => {

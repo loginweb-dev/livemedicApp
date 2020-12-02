@@ -20,7 +20,7 @@ function VideoCall(props) {
             /* Você também pode usar o JitsiMeet.audioCall (url) para chamadas apenas de áudio */
             /* Você pode terminar programaticamente a chamada com JitsiMeet.endCall () */
 
-            await AsyncStorage.setItem('SessionCallComing', '');
+            await AsyncStorage.setItem('SessionCallInfo', '{}');
         }, 1000);
   }, [])
 

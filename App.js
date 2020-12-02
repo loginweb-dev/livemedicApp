@@ -11,7 +11,7 @@ import messaging from '@react-native-firebase/messaging';
 
 messaging().setBackgroundMessageHandler(async remoteMessage => {
   console.log(remoteMessage.data);
-  await AsyncStorage.setItem('SessionCallComing', JSON.stringify(remoteMessage.data))
+  await AsyncStorage.setItem('SessionCallInfo', JSON.stringify(remoteMessage.data))
 });
 
 function App() {
