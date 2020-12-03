@@ -1,13 +1,12 @@
 import React, { useEffect } from 'react';
+import { View, BackHandler } from "react-native";
 import AsyncStorage from '@react-native-community/async-storage';
 import JitsiMeet, { JitsiMeetView } from 'react-native-jitsi-meet';
 import { connect } from 'react-redux';
-import { stopSampleSound } from  'react-native-notification-sounds';
 
 function VideoCall(props) {
 
     useEffect(() => {
-        stopSampleSound();
         setTimeout(async () => {
             const url = props.route.params.callInfo.url;
             const userInfo = {
@@ -16,34 +15,30 @@ function VideoCall(props) {
                 avatar: props.authLogin.user.email,
             };
 
+            // console.log(url, userInfo)
+
             if(url){
                 JitsiMeet.call(url, userInfo);
             }
-            /* Você também pode usar o JitsiMeet.audioCall (url) para chamadas apenas de áudio */
-            /* Você pode terminar programaticamente a chamada com JitsiMeet.endCall () */
 
             await AsyncStorage.setItem('SessionCallInfo', '{}');
-        }, 1000);
-  }, [])
+        }, 2000);
+    }, [])
 
-  useEffect(() => {
-    return () => {
-        props.setCallInit(true);
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
         JitsiMeet.endCall();
-    };
-  });
+        // props.navigation.navigate('TabMenu');
+    });
 
     function onConferenceTerminated(nativeEvent) {
         /* Conference terminated event */
-        // console.log(nativeEvent)
-        props.setCallInit(true);
-        console.log('terminate')
     }
 
     function onConferenceJoined(nativeEvent) {
         /* Conference joined event */
         // console.log(nativeEvent)
         props.setCallInit(true);
+        props.setCallInProgress(true);
         console.log('joined')
     }
 
@@ -51,20 +46,23 @@ function VideoCall(props) {
         /* Conference will join event */
         // console.log(nativeEvent)
         props.setCallInit(true);
+        props.setCallInProgress(true);
         console.log('willjoin')
     }
 
     return (
-        <JitsiMeetView
-            onConferenceTerminated={e => onConferenceTerminated(e)}
-            onConferenceJoined={e => onConferenceJoined(e)}
-            onConferenceWillJoin={e => onConferenceWillJoin(e)}
-            style={{
-                flex: 1,
-                height: '100%',
-                width: '100%',
-            }}
-        />
+        <View style={{ backgroundColor: 'black', flex: 1, height: '100%', width: '100%', }}>
+            <JitsiMeetView
+                onConferenceTerminated={e => onConferenceTerminated(e)}
+                onConferenceJoined={e => onConferenceJoined(e)}
+                onConferenceWillJoin={e => onConferenceWillJoin(e)}
+                style={{
+                    flex: 1,
+                    height: '100%',
+                    width: '100%',
+                }}
+            />
+        </View>
     )
 }
 
@@ -79,7 +77,11 @@ const mapDispatchToProps = (dispatch) => {
         setCallInit : (callInit) => dispatch({
             type: 'SET_CALL_INIT',
             payload: callInit
-        })
+        }),
+        setCallInProgress : (callInProgress) => dispatch({
+            type: 'SET_CALL_IN_PROGRESS',
+            payload: callInProgress
+        }),
     }
 }
 

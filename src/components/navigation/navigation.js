@@ -7,7 +7,12 @@ import {
     Image,
     TouchableOpacity,
     BackHandler,
-    Alert
+    Alert,
+    DeviceEventEmitter,
+    Modal,
+    Dimensions,
+    ImageBackground,
+    ScrollView
 } from "react-native";
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -17,7 +22,7 @@ import { connect } from 'react-redux';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import AwesomeAlert from 'react-native-awesome-alerts';
-import NotificationSounds, { playSampleSound } from  'react-native-notification-sounds';
+import IncomingCall from 'react-native-incoming-call';
 
 // Views
 import SplashScreen from "../../UI/SplashScreen";
@@ -32,6 +37,8 @@ import VideoCall from "../../Views/VideoCall/VideoCall";
 
 // UI
 import DropDownMenu from "../../UI/DropDownMenu";
+import HyperLink from "../../UI/HyperLink";
+
 
 // Firebase
 import auth from '@react-native-firebase/auth';
@@ -41,12 +48,16 @@ import messaging from '@react-native-firebase/messaging';
 // Configurations
 import { env } from '../../config/env.js';
 
+const screenHeight = Math.round(Dimensions.get('window').height);
+
+
 const Stack = createStackNavigator();
 
 function Navigation(props) {
   
     var [showMenu, handleMenu] = useState(false);
     var [showAlert, handleAlert] = useState(false);
+    var [aboutModal, handleAboutModal] = useState(false);
 
     useEffect(() => {
 
@@ -54,24 +65,44 @@ function Navigation(props) {
 
         // Listen to whether the token changes
         messaging().onTokenRefresh(token => {
-            console.log(token)
+            // console.log(token)
         });
 
         // Notificaciones en primer plano
         messaging().onMessage(async remoteMessage => {
             let info = remoteMessage.data;
+            console.log(info)
+            // await AsyncStorage.setItem('SessionCallInfo', JSON.stringify(info));
+            IncomingCall.display(
+                'callUUIDv4', // Call UUID v4
+                info.specialistName, // Username
+                info.specialistAvatar, // Avatar URL
+                'Llamada entrante', // Info text
+                30000 // Timeout for end call after 20s
+            );
 
-            props.setCallInfo({
-                url: info.url,
-                specialist: {
-                    name: info.specialistName,
-                    avatar: info.specialistAvatar
-                }
+            // Listen to headless action events
+            DeviceEventEmitter.addListener("endCall", async payload => {
+                // End call action here
+                await AsyncStorage.setItem('SessionCallInfo', '{}');
             });
-            props.setCallInProgress(true);
-            NotificationSounds.getNotifications('ringtone').then(soundsList  => {
-                // console.warn('SOUNDS', JSON.stringify(soundsList));
-                playSampleSound(soundsList[0]);
+            DeviceEventEmitter.addListener("answerCall", (payload) => {
+                // console.log('answerCall', payload);
+                if (payload.isHeadless) {
+                    // Called from killed state
+                    IncomingCall.openAppFromHeadlessMode(payload.uuid);
+                } else {
+                    // Called from background state
+                    IncomingCall.backToForeground();
+                    props.setCallInfo({
+                        url: info.url,
+                        specialist: {
+                            name: info.specialistName,
+                            avatar: info.specialistAvatar
+                        }
+                    });
+                    props.setCallInProgress(true);
+                }
             });
         });
 
@@ -128,13 +159,6 @@ return (
                 })}
             />
             <Stack.Screen
-                name="VideoCall" component={VideoCall}
-                options={{
-                title: '',
-                headerTransparent: true,
-                }}
-            />
-            <Stack.Screen
                 name="TabMenu" component={TabMenu}
                 options={{
                     title: env.appName,
@@ -162,7 +186,7 @@ return (
         {
             showMenu &&
             <DropDownMenu onPress={ () => handleMenu(false)}>
-                <TouchableOpacity onPress={ () => handleMenu(false)} style={{ height: 40 }}>
+                <TouchableOpacity onPress={ () => {handleMenu(false); handleAboutModal(true)}} style={{ height: 40 }}>
                     <View style={{ height: 30 }}>
                     <Text style={{ fontSize: 16, fontWeight: 'bold' }}><Icon name="help-circle-outline" size={15} /> Ayuda</Text>
                     </View>
@@ -174,6 +198,51 @@ return (
                 </TouchableOpacity>
             </DropDownMenu>
         }
+
+        {/* Modal about */}
+        <Modal
+            animationType="slide"
+            visible={aboutModal}
+            height={screenHeight}
+            onRequestClose={()=> handleAboutModal(false)}
+        >
+            <ScrollView style={{ flex: 1 }}>
+                <ImageBackground source={env.images.banner} style={{ height: 200 }}>
+                    <View style={{ flex: 1, justifyContent: 'center', marginLeft: 10 }}>
+                        <Text style={{ color: 'white', fontSize: 25 }}>{ env.appName }</Text>
+                    </View>
+                </ImageBackground>
+                <View style={{ margin: 10 }}>
+                    <View style={{ marginVertical: 10 }}>
+                        <Text style={{ marginBottom: 10, fontSize: 18, fontWeight: 'bold' }}>Misión</Text>
+                        <Text style={{ color: env.color.textMuted }}>{ env.about.mision }</Text>
+                    </View>
+                    <View style={{ marginVertical: 10 }}>
+                        <Text style={{ marginBottom: 10, fontSize: 18, fontWeight: 'bold' }}>Visión</Text>
+                        <Text style={{ color: env.color.textMuted }}>{ env.about.vision }</Text>
+                    </View>
+                </View>
+                <View style={{ margin: 10 }}>
+                    <Text style={{ marginBottom: 10, fontSize: 18, fontWeight: 'bold' }}>Telefonos de contacto</Text>
+                    {
+                        env.about.phones.map(phone => 
+                            <HyperLink key={phone.id} url={`whatsapp://send?phone=${phone.number}`} color={env.color.primary}>
+                                {phone.name}
+                            </HyperLink>
+                        )
+                    }
+                </View>
+                <View style={{ margin: 10, marginBottom: 30 }}>
+                    <Text style={{ marginBottom: 10, fontSize: 18, fontWeight: 'bold' }}>Sitio web</Text>
+                    <HyperLink url='https://livemedic.net' color={env.color.primary}>
+                        livemedic.net
+                    </HyperLink>
+                </View>
+                <View style={{ margin: 10, marginBottom: 20 }}>
+                    <Text style={{ textAlign: 'center' }}>Santísima Trinidad - Beni - Bolivia</Text>
+                </View>
+            </ScrollView>
+        </Modal>
 
         <AwesomeAlert
             show={showAlert}

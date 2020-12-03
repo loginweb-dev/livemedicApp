@@ -6,7 +6,7 @@ const HyperLink = props => {
   return (
     <TouchableOpacity
         onPress={() => Linking.openURL(props.url)}
-        style={{ marginHorizontal: 5 }}
+        style={ props.style ? props.style : {} }
     >
         <Text style={{ color: props.color ? props.color : 'white', fontSize: props.size ? props.size : 15, fontWeight: 'bold' }}>
             {   props.icon &&

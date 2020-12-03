@@ -47,9 +47,9 @@ export default function CardProfileHorizontal(props) {
             </View>
             <View style={{ alignItems: 'center', position: 'absolute', bottom: 0 }}>
                 {
-                    !props.available &&
-                    <View style={{ alignItems: 'center' }}>
-                        <Text style={{ color: 'red',  textAlign: 'center' }}>No se encuantra disponible ahora, si desea puede programar una cita para otro momento en nuestra página web.</Text>
+                    props.available != 1 &&
+                    <View style={{ alignItems: 'center', marginBottom: 20 }}>
+                        <Text style={{ color: 'red',  textAlign: 'center' }}>El especialista no se encuentra disponible ahora, si desea puede programar una cita para otro momento en nuestra página web.</Text>
                         <TouchableOpacity
                             onPress={() => Linking.openURL('https://livemedic.net')}
                             style={{ marginTop: 5 }}
@@ -59,7 +59,7 @@ export default function CardProfileHorizontal(props) {
                     </View>
                 }
                 {
-                    props.available &&
+                    props.available == 1 &&
                     <ButtonBlock
                         icon='videocam-outline'
                         title='Nueva cita ahora'

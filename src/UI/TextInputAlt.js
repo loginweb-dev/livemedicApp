@@ -17,7 +17,7 @@ export default function TextInputAlt(props) {
             <View style={{ width: '100%' }}>
                 <Text style={{ color: '#B7B7B7', fontWeight: 'bold' }}>{props.label}</Text>
                 <TextInput
-                    style={{ height: 40, borderColor: '#C4C4C4', borderBottomWidth: 2, fontWeight: 'bold' }}
+                    style={[{ height: 40, borderColor: '#C4C4C4', borderBottomWidth: 2 }, props.style ? props.style : {}]}
                     placeholder={props.placeholder}
                     placeholderTextColor='#C4C4C4'
                     secureTextEntry={props.password && showPassword ? true: false}
@@ -25,6 +25,9 @@ export default function TextInputAlt(props) {
                     autoCapitalize={props.autoCapitalize ? props.autoCapitalize : 'none'}
                     value={props.value}
                     onChangeText={props.onChangeText}
+                    multiline={props.multiline ? true : false }
+                    numberOfLines={props.numberOfLines ? props.numberOfLines : 1}
+                    maxLength={props.maxLength ? props.maxLength : 50}
                 />
                 { props.password &&
                     <TouchableOpacity onPress={() => handleShowPassword(!showPassword)} style={ styles.icon }>

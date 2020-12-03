@@ -21,8 +21,7 @@ import TextInputAlt from "../../UI/TextInputAlt";
 import ButtonBlock from "../../UI/ButtonBlock";
 import ClearFix from "../../UI/ClearFix";
 
-// Call coming
-import CallComing from "../../UI/CallComing";
+// Llamda en proceso
 import CallReturn from "../../UI/CallReturn";
 
 // Configurations
@@ -75,6 +74,12 @@ class Config extends Component {
     }
 
     render(){
+
+        // Redirect to call incoming
+        if(this.props.callInProgress && !this.props.callInit){
+            this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})
+        }
+
         return (
             <SafeAreaView style={ styles.container }>
                 <ScrollView showsVerticalScrollIndicator={false} style={{ paddingVertical: 10 }}>
@@ -171,8 +176,7 @@ class Config extends Component {
                     </ScrollView>
                 </Modal>
 
-                {/* Llamada entrante */}
-                { this.props.callInProgress && !this.props.callInit && <CallComing answerCall={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
+                {/* Llamada en proceso */}
                 { this.props.callInProgress && this.props.callInit && <CallReturn onPress={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
             </SafeAreaView>
         )

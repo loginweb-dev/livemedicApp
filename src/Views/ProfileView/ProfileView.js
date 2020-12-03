@@ -23,11 +23,11 @@ import RadioForm from 'react-native-simple-radio-button';
 import ButtonBlock from "../../UI/ButtonBlock";
 import HeaderInfo from "../../UI/HeaderInfo";
 import HyperLink from "../../UI/HyperLink";
-
-// Call coming
-import CallComing from "../../UI/CallComing";
-import CallReturn from "../../UI/CallReturn";
 import OverlayLoading from "../../UI/OverlayLoading";
+import PartialModal from "../../UI/PartialModal";
+
+// Llamda en proceso
+import CallReturn from "../../UI/CallReturn";
 
 // Config
 import { env } from "../../config/env";
@@ -60,6 +60,7 @@ var timer = null;
 import CardProfileHorizontal from "../../UI/CardProfileHorizontal";
 import ClearFix from "../../UI/ClearFix";
 import AlertGradient from "../../UI/AlertGradient";
+import TextInputAlt from "../../UI/TextInputAlt";
 
 const screenWidth = Math.round(Dimensions.get('window').width);
 const screenHeight = Math.round(Dimensions.get('window').height);
@@ -70,6 +71,7 @@ class ProfileView extends Component {
         this.state = {
             specialist: this.props.route.params.specialist,
             paymentAccounts: [],
+            descriptionModal: false,
             paymentModal: false,
             successModal: false,
             errorModal: false,
@@ -137,7 +139,7 @@ class ProfileView extends Component {
             customer_id: this.props.authLogin.user.customer.id,
             payment_type: this.state.payment_type,
             payment_account_id: this.state.paymentAccounts[this.state.accountSeleted].id,
-            observations: 'nnnnnnn'
+            observations: this.state.observations ? this.state.observations : 'No definido',
         }
 
         let headers = {
@@ -191,7 +193,7 @@ class ProfileView extends Component {
     }
 
     closeModalSuccess = () => {
-        this.setState({ successModal: false }, () => {
+        this.setState({ successModal: false, errorModal: false }, () => {
             this.props.navigation.navigate('TabMenu')
         })
     }
@@ -201,6 +203,12 @@ class ProfileView extends Component {
     }
 
     render(){
+
+        // Redirect to call incoming
+        if(this.props.callInProgress && !this.props.callInit){
+            this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})
+        }
+
         return (
             <SafeAreaView style={ styles.container }>
                 <CardProfileHorizontal
@@ -211,8 +219,53 @@ class ProfileView extends Component {
                     rating={this.props.route.params.rating}
                     available={this.state.specialist.status}
                     description={this.state.specialist.description}
-                    onPress={() => this.setState({paymentModal: true})}
+                    onPress={() => this.setState({descriptionModal: true})}
                 />
+
+                {/* Modal description */}
+                <PartialModal
+                    animationType="slide"
+                    visible={this.state.descriptionModal}
+                    height={230}
+                    onRequestClose={()=> this.setState({descriptionModal: false})}
+                >
+                    <View style={{ marginHorizontal: 10, marginTop: 10 }}>
+                        <TextInputAlt
+                            label='Motivo de la consulta'
+                            placeholder='Describe el motivo de tu consulta'
+                            value={ this.state.observations }
+                            onChangeText={ value => this.setState({observations: value}) }
+                            multiline
+                            numberOfLines={4}
+                            maxLength={191}
+                            style={{ height: 100 }}
+                        />
+                    </View>
+                    <View style={{ alignItems: 'center', flexDirection: 'row', width: screenWidth }}>
+                        <View style={{ width: '50%', paddingHorizontal: 20 }}> 
+                            <ButtonBlock
+                                icon='close-circle-outline'
+                                title='Cancelar'
+                                color='white'
+                                borderColor='red'
+                                colorText='red'
+                                style={{ marginTop: 20 }}
+                                onPress={ () => this.setState({descriptionModal: false}) }
+                            />
+                        </View>
+                        <View style={{ width: '50%', paddingHorizontal: 20 }}>
+                            <ButtonBlock
+                                icon='checkmark-circle-outline'
+                                title='Aceptar'
+                                color={env.color.primary}
+                                colorText='white'
+                                style={{ marginTop: 20 }}
+                                onPress={ () => this.setState({descriptionModal: false, paymentModal: true}) }
+                            />
+                        </View>
+                    </View>
+                </PartialModal>
+
                 {/* Modal payment */}
                 <Modal
                     animationType="slide"
@@ -288,12 +341,13 @@ class ProfileView extends Component {
                                                 Debes realizar una tranferencia bancaria al número de cuenta seleccionado y posteriormente enviar una captura del comprobante de tranferencia a cualquiera de los siguientes números de Whatsapp:
                                             </Text>
                                             <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20}}>
-                                                <HyperLink url='whatsapp://send?phone=59172841731'>
-                                                    +591 72841731
-                                                </HyperLink>
-                                                <HyperLink url='whatsapp://send?phone=59176866169'>
-                                                    +591 76866169
-                                                </HyperLink>
+                                                {
+                                                    env.about.phones.map(phone => 
+                                                        <HyperLink key={phone.id} url={`whatsapp://send?phone=${phone.number}`} style={{ marginHorizontal: 10 }}>
+                                                            +{phone.number}
+                                                        </HyperLink>
+                                                    )
+                                                }
                                             </View>
                                         </AlertGradient>
                                         <ButtonBlock
@@ -320,7 +374,7 @@ class ProfileView extends Component {
                     height={screenHeight}
                     onRequestClose={()=> this.setState({successModal: false})}
                 >
-                    <View style={ styles.successContent }>
+                    <View style={ styles.infoContent }>
                         <Icon name='checkmark-circle-outline' size={100} color='green' />
                         <Text style={{ fontSize: 30, color: '#767676' }}>Bien hecho!</Text>
                         <Text style={{ color: '#767676', textAlign: 'center' }}>En un momento nuestro especialista se comunicará contigo, aguarda un momento por favor!.</Text>
@@ -342,7 +396,7 @@ class ProfileView extends Component {
                     height={screenHeight}
                     onRequestClose={()=> this.setState({errorModal: false})}
                 >
-                    <View style={ styles.successContent }>
+                    <View style={ styles.infoContent }>
                         <Icon name='close-circle-outline' size={100} color='#DB3C3C' />
                         <Text style={{ fontSize: 30, color: '#767676' }}>Error!</Text>
                         <Text style={{ color: '#767676', textAlign: 'center' }}>Ocurrió un error inesperado, intenta nuevamente!.</Text>
@@ -352,13 +406,12 @@ class ProfileView extends Component {
                             color='#DB3C3C'
                             colorText='white'
                             style={{ marginVertical: 20 }}
-                            onPress={ () => this.setState({ errorModal: false }) }
+                            onPress={ this.closeModalSuccess }
                         />
                     </View>
                 </Modal>
 
-                {/* Llamada entrante */}
-                { this.props.callInProgress && !this.props.callInit && <CallComing answerCall={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
+                {/* Llamada en proceso */}
                 { this.props.callInProgress && this.props.callInit && <CallReturn onPress={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
 
                 { this.state.loading && <OverlayLoading/>}
@@ -387,7 +440,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1
     },
-    successContent: {
+    infoContent: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',

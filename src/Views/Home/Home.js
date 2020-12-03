@@ -18,8 +18,7 @@ import CardBorderLeft from "../../UI/CardBorderLeft";
 import BackgroundLoading from "../../UI/BackgroundLoading";
 import HeaderInfo from "../../UI/HeaderInfo";
 
-// Call coming
-import CallComing from "../../UI/CallComing";
+// Llamda en proceso
 import CallReturn from "../../UI/CallReturn";
 
 // Config
@@ -54,7 +53,6 @@ class Home extends Component {
                     }
                 });
                 this.props.setCallInProgress(true);
-                this.props.navigation.navigate('VideoCall', {callInfo: info});
             } catch (error) {
                 console.log(error)
             }
@@ -90,11 +88,36 @@ class Home extends Component {
         .catch(error => ({'error': error}));
     }
 
+    async componentDidUpdate(){
+        const SessionCallInfo = await AsyncStorage.getItem('SessionCallInfo');
+        if(SessionCallInfo != '' && SessionCallInfo != '{}'){
+            try {
+                let info = JSON.parse(SessionCallInfo);
+                this.props.setCallInfo({
+                    url: info.url,
+                    specialist: {
+                        name: info.specialistName,
+                        avatar: info.specialistAvatar
+                    }
+                });
+                this.props.setCallInProgress(true);
+                this.props.navigation.navigate('VideoCall', {callInfo: info});
+            } catch (error) {
+                console.log(error)
+            }
+        }
+    }
+
     render(){
         if(!this.state.specialities.length){
             return(
                 <BackgroundLoading/>
             )
+        }
+
+        // Redirect to call incoming
+        if(this.props.callInProgress && !this.props.callInit){
+            this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})
         }
         return (
             <SafeAreaView style={ styles.container }>
@@ -119,8 +142,7 @@ class Home extends Component {
                     numColumns={2}
                 />
 
-                {/* Llamada entrante */}
-                { this.props.callInProgress && !this.props.callInit && <CallComing answerCall={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
+                {/* Llamada en proceso */}
                 { this.props.callInProgress && this.props.callInit && <CallReturn onPress={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
             
             </SafeAreaView>
