@@ -135,28 +135,36 @@ return (
             <Stack.Screen
                 name="Login" component={Login}
                 options={{
-                title: '',
-                headerTransparent: true,
+                    title: '',
+                    headerTransparent: true,
                 }}
             />
             <Stack.Screen
                 name="Register" component={Register}
                 options={{
-                title: '',
-                headerTransparent: true,
+                    title: '',
+                    headerTransparent: true,
                 }}
             />
             <Stack.Screen
                 name="ProfileList" component={ProfileList}
-                options={({ route }) => ({
-                title: <Text>{route.params.speciality.name}</Text>,
+                    options={({ route }) => ({
+                    title: <Text>{route.params.speciality.name}</Text>,
                 })}
             />
             <Stack.Screen
                 name="ProfileView" component={ProfileView}
-                options={({ route }) => ({
-                title: <Text>{route.params.specialist.name}</Text>,
+                    options={({ route }) => ({
+                    title: <Text>{route.params.specialist.name}</Text>,
                 })}
+            />
+            <Stack.Screen
+                name="VideoCall" component={VideoCall}
+                options={{
+                    title: '',
+                    headerTransparent: true,
+                    headerLeft: null
+                }}
             />
             <Stack.Screen
                 name="TabMenu" component={TabMenu}
