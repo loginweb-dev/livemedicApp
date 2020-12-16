@@ -21,6 +21,7 @@ import { GoogleSignin } from '@react-native-community/google-signin';
 import BackgroundColor from "../../../UI/BackgroundColor";
 import TextInputAlt from "../../../UI/TextInputAlt";
 import ButtonBlock from "../../../UI/ButtonBlock";
+import OverlayLoading from "../../../UI/OverlayLoading";
 
 // Config
 import { env, strRandom } from "../../../config/env";
@@ -39,7 +40,8 @@ class Login extends Component {
         super(props);
         this.state = {
             email: '',
-            password: ''
+            password: '',
+            loading: false
         }
     }
 
@@ -105,20 +107,11 @@ class Login extends Component {
             firebase_token: Token._W,
         };
 
-        let req = await fetch(`${env.API}/api/auth/login`, {
-            method: 'POST',
-            body: JSON.stringify(params),
-            headers:{
-                'Content-Type': 'application/json',
-                'accept': 'application/json'
-            }
-        }).then(res => res.json())
-        .catch(error => ({'error': error}));
-
         this.handleLogin(params);
     }
 
     async handleLogin(params){
+        this.setState({loading: true});
         let req = await fetch(`${env.API}/api/auth/login`, {
             method: 'POST',
             body: JSON.stringify(params),
@@ -129,7 +122,10 @@ class Login extends Component {
         }).then(res => res.json())
         .catch(error => ({'error': error}));
 
+        // console.log(req)
+        
         if(req.user){
+            this.setState({loading: false});
             this.props.setUser(req);
             AsyncStorage.setItem('SessionAuthLogin', JSON.stringify(req));
             this.props.navigation.reset({
@@ -138,6 +134,7 @@ class Login extends Component {
                 key: null,
             });
         }else{
+            this.setState({loading: false});
             showMessage({
                 message: "Error",
                 description: req.error ? req.error : 'Error desconocido.',
@@ -205,6 +202,7 @@ class Login extends Component {
                         </View>
                     </View>
                 </ScrollView>
+                { this.state.loading && <OverlayLoading title="Iniciando sesión..." />}
             </SafeAreaView>
         );
     }

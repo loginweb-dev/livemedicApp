@@ -13,7 +13,7 @@ import messaging from '@react-native-firebase/messaging';
 import IncomingCall from 'react-native-incoming-call';
 
 messaging().setBackgroundMessageHandler(async remoteMessage => {
-  // console.log(remoteMessage.data);
+  console.log(remoteMessage.data);
   await AsyncStorage.setItem('SessionCallInfo', JSON.stringify(remoteMessage.data));
   IncomingCall.display(
     'callUUIDv4', // Call UUID v4
@@ -45,7 +45,7 @@ function App() {
   return (
     <Provider store={store}>
       <Navigation/>
-      <FlashMessage position="top" duration={2300} />
+      <FlashMessage position="top" duration={2800} />
     </Provider>
   );
 }

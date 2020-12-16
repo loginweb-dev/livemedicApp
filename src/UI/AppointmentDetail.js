@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    View, Text, Image, StyleSheet, ScrollView, FlatList
+    View, Text, Image, StyleSheet, ScrollView, FlatList, TouchableOpacity
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -8,7 +8,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { env } from '../config/env';
 
 // UI
-import Card from "../UI/Card";
+import Card from "./Card";
+import HyperLink from "./HyperLink";
 
 export default function AppointmentDetail(props) {
     const renderItem = ({ item }) => (
@@ -50,6 +51,11 @@ export default function AppointmentDetail(props) {
                                         }
                                         keyExtractor={item => item.id}
                                     />
+                                    <View style={{ flexDirection: 'row-reverse' }}>
+                                        <HyperLink url={`${env.API}/home/prescriptions/details/${prescription.id}/download`} color={env.color.primary}>
+                                            Descargar
+                                        </HyperLink>
+                                    </View>
                                     <View style={{ borderWidth: 1, borderColor: '#EBEBEB' }}></View>
                                 </View>
                             )
@@ -71,6 +77,11 @@ export default function AppointmentDetail(props) {
                                         }
                                         keyExtractor={item => item.id}
                                     />
+                                    <View style={{ flexDirection: 'row-reverse' }}>
+                                        <HyperLink url={`${env.API}/home/order_analysis/details/${analysi.id}/download`} color={env.color.primary}>
+                                            Descargar
+                                        </HyperLink>
+                                    </View>
                                     <View style={{ borderWidth: 1, borderColor: '#EBEBEB' }}></View>
                                 </View>
                             )

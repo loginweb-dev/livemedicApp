@@ -4,12 +4,12 @@ import { View, StyleSheet, Text, ActivityIndicator, Dimensions } from 'react-nat
 const screenWidth = Math.round(Dimensions.get('window').width);
 const screenHeight = Math.round(Dimensions.get('window').height);
 
-export default function OverlayLoading(){
+export default function OverlayLoading(props){
 
     return (
         <View style={ style.container }>
             <ActivityIndicator size="large" color="#4598D0" />
-            <Text style={{ marginTop: 10, color: 'white' }}>Cargando...</Text>
+            <Text style={{ marginTop: 10, color: 'white' }}>{ props.title ? props.title : 'Cargando...' }</Text>
         </View>
     )
 }

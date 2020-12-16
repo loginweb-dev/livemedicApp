@@ -46,6 +46,7 @@ class Home extends Component {
             try {
                 let info = JSON.parse(SessionCallInfo);
                 this.props.setCallInfo({
+                    id: info.id,
                     url: info.url,
                     specialist: {
                         name: info.specialistName,
@@ -60,8 +61,10 @@ class Home extends Component {
             fetch(`${env.API}/api/appointment/active/${this.props.authLogin.user.customer.id}`, headers)
             .then(res => res.json())
             .then(res => {
+                // console.log(res)
                 if(res.appointment){
                     this.props.setCallInfo({
+                        id: res.appointment.id,
                         url: `${res.server}/Consulta-${res.appointment.code}`,
                         specialist: {
                             name: res.appointment.specialist.full_name,
@@ -94,6 +97,7 @@ class Home extends Component {
             try {
                 let info = JSON.parse(SessionCallInfo);
                 this.props.setCallInfo({
+                    id: info.id,
                     url: info.url,
                     specialist: {
                         name: info.specialistName,

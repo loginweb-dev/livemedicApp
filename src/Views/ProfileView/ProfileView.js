@@ -8,8 +8,7 @@ import {
     ScrollView,
     Dimensions,
     TouchableOpacity,
-    Modal,
-    Linking
+    Modal
 } from 'react-native';
 
 import { connect } from 'react-redux';

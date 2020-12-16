@@ -19,6 +19,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-community/async-storage';
 import { connect } from 'react-redux';
+import { showMessage } from "react-native-flash-message";
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import AwesomeAlert from 'react-native-awesome-alerts';
@@ -72,38 +73,51 @@ function Navigation(props) {
         messaging().onMessage(async remoteMessage => {
             let info = remoteMessage.data;
             console.log(info)
-            // await AsyncStorage.setItem('SessionCallInfo', JSON.stringify(info));
-            IncomingCall.display(
-                'callUUIDv4', // Call UUID v4
-                info.specialistName, // Username
-                info.specialistAvatar, // Avatar URL
-                'Llamada entrante', // Info text
-                30000 // Timeout for end call after 20s
-            );
 
-            // Listen to headless action events
-            DeviceEventEmitter.addListener("endCall", async payload => {
-                // End call action here
-                await AsyncStorage.setItem('SessionCallInfo', '{}');
-            });
-            DeviceEventEmitter.addListener("answerCall", (payload) => {
-                // console.log('answerCall', payload);
-                if (payload.isHeadless) {
-                    // Called from killed state
-                    IncomingCall.openAppFromHeadlessMode(payload.uuid);
-                } else {
-                    // Called from background state
-                    IncomingCall.backToForeground();
-                    props.setCallInfo({
-                        url: info.url,
-                        specialist: {
-                            name: info.specialistName,
-                            avatar: info.specialistAvatar
-                        }
-                    });
-                    props.setCallInProgress(true);
-                }
-            });
+            if(info.type == 'calling'){
+                IncomingCall.display(
+                    'callUUIDv4', // Call UUID v4
+                    info.specialistName, // Username
+                    info.specialistAvatar, // Avatar URL
+                    'Llamada entrante', // Info text
+                    30000 // Timeout for end call after 20s
+                );
+
+                // Listen to headless action events
+                DeviceEventEmitter.addListener("endCall", async payload => {
+                    await AsyncStorage.setItem('SessionCallInfo', '{}');
+                });
+                
+                DeviceEventEmitter.addListener("answerCall", (payload) => {
+                    // console.log('answerCall', payload);
+                    if (payload.isHeadless) {
+                        // Called from killed state
+                        IncomingCall.openAppFromHeadlessMode(payload.uuid);
+                    } else {
+                        // Called from background state
+                        IncomingCall.backToForeground();
+                        props.setCallInfo({
+                            id: info.id,
+                            url: info.url,
+                            specialist: {
+                                name: info.specialistName,
+                                avatar: info.specialistAvatar
+                            }
+                        });
+                        props.setCallInProgress(true);
+                    }
+                });
+            }
+
+            if(info.type == 'prescription_analysi'){
+                console.log(info)
+                showMessage({
+                    message: "Nuevo historial",
+                    description: info.message,
+                    type: "success",
+                    icon: 'success'
+                });
+            }
         });
 
     }, []);

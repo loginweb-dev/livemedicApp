@@ -17,6 +17,7 @@ import BackgroundColor from "../../../UI/BackgroundColor";
 import TextInputAlt from "../../../UI/TextInputAlt";
 import ButtonBlock from "../../../UI/ButtonBlock";
 import ClearFix from "../../../UI/ClearFix";
+import OverlayLoading from "../../../UI/OverlayLoading";
 
 // Config
 import { env, strRandom } from "../../../config/env";
@@ -34,6 +35,7 @@ class Register extends Component {
             password: '',
             password_repeat: '',
             password_validate: false,
+            loading: false
         }
     }
 
@@ -79,6 +81,7 @@ class Register extends Component {
         }
 
         if(paramans.name && paramans.email && paramans.password && paramans.password_repeat){
+            this.setState({loading: true});
             let req = await fetch(`${env.API}/api/auth/register`, {
                 method: 'POST',
                 body: JSON.stringify(paramans),
@@ -90,6 +93,7 @@ class Register extends Component {
             .catch(error => ({'error': error}));
 
             if(req.user){
+                this.setState({loading: false});
                 this.props.setUser(req);
                 AsyncStorage.setItem('SessionAuthLogin', JSON.stringify(req));
                 this.props.navigation.reset({
@@ -98,6 +102,7 @@ class Register extends Component {
                     key: null,
                 });
             }else{
+                this.setState({loading: false});
                 showMessage({
                     message: "Error",
                     description: req.error ? req.error : 'Error desconocido.',
@@ -184,6 +189,7 @@ class Register extends Component {
                         <ClearFix height={50} />
                     </View>
                 </ScrollView>
+                { this.state.loading && <OverlayLoading title="Registrando..." />}
             </SafeAreaView>
         );
     }
