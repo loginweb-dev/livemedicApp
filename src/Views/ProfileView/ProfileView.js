@@ -80,7 +80,7 @@ class ProfileView extends Component {
             PaymentCreditCardValid: false,
             // Params for request
             price_add: 0,
-            payment_type: 2,
+            payment_type: 1,
             payment_account_id: null,
             observations: '',
             loading: false
@@ -174,7 +174,7 @@ class ProfileView extends Component {
 
     collapseTabs(index, isCollapsed){
 
-        let payment_types = [2, 1];
+        let payment_types = [1, 2];
 
         if(isCollapsed){
             var collapseStatus = [];
@@ -277,41 +277,9 @@ class ProfileView extends Component {
                             Para que puedas comunicarte con nuestro especialista debes realizar el pago de la consulta.
                         </HeaderInfo>
                         <ScrollView showsVerticalScrollIndicator={false}>
-                            {/* Pago con tajeta */}
-                            <Collapse isCollapsed={ this.state.collapseStatus[0] } onToggle={ isCollapsed => this.collapseTabs(0, isCollapsed) } >
-                                <CollapseHeader style={{ width: '100%', paddingHorizontal: 5, paddingTop: 5 }}>
-                                    <HeaderCollapse
-                                        title='Tarjeta de crédito'
-                                        image={require('../../assets/images/credit-card.png')}
-                                    />
-                                </CollapseHeader>
-                                <CollapseBody style={{paddingHorizontal: 5}}>
-                                    <View style={{ borderWidth: 1, borderColor: '#E6E6E6', padding: 10, paddingBottom: 20 }}>
-                                        <CreditCardInput
-                                            onChange={this.handleCreditCard}
-                                            labels={
-                                                {number: "NUMERO DE TARJETA", expiry: "EXP", cvc: "CVC/CCV"}
-                                            }
-                                            placeholders={
-                                                { number: "1234 5678 1234 5678", expiry: "MM/AA", cvc: "CVC" }
-                                            }
-                                        />
-                                        { this.state.PaymentCreditCardValid &&
-                                            <ButtonBlock
-                                                icon='checkmark-circle-outline'
-                                                title='Realizar pago'
-                                                color='green'
-                                                colorText='white'
-                                                style={{ marginTop: 20 }}
-                                                onPress={ () => this.sendPaymentCreditCad() }
-                                            />
-                                        }
-                                    </View>
-                                </CollapseBody>
-                            </Collapse>
 
-                            {/* Tranferencia bancaria */}
-                            <Collapse isCollapsed={ this.state.collapseStatus[1] } onToggle={ isCollapsed => this.collapseTabs(1, isCollapsed) } >
+                        {/* Tranferencia bancaria */}
+                            <Collapse isCollapsed={ this.state.collapseStatus[0] } onToggle={ isCollapsed => this.collapseTabs(0, isCollapsed) } >
                                 <CollapseHeader style={{ width: '100%', paddingHorizontal: 5, paddingTop: 5 }}>
                                     <HeaderCollapse
                                         title='Tranferencia bancaria'
@@ -360,6 +328,38 @@ class ProfileView extends Component {
                                     </View>
                                 </CollapseBody>
                             </Collapse>
+                            {/* Pago con tajeta */}
+                            {/* <Collapse isCollapsed={ this.state.collapseStatus[1] } onToggle={ isCollapsed => this.collapseTabs(1, isCollapsed) } >
+                                <CollapseHeader style={{ width: '100%', paddingHorizontal: 5, paddingTop: 5 }}>
+                                    <HeaderCollapse
+                                        title='Tarjeta de crédito'
+                                        image={require('../../assets/images/credit-card.png')}
+                                    />
+                                </CollapseHeader>
+                                <CollapseBody style={{paddingHorizontal: 5}}>
+                                    <View style={{ borderWidth: 1, borderColor: '#E6E6E6', padding: 10, paddingBottom: 20 }}>
+                                        <CreditCardInput
+                                            onChange={this.handleCreditCard}
+                                            labels={
+                                                {number: "NUMERO DE TARJETA", expiry: "EXP", cvc: "CVC/CCV"}
+                                            }
+                                            placeholders={
+                                                { number: "1234 5678 1234 5678", expiry: "MM/AA", cvc: "CVC" }
+                                            }
+                                        />
+                                        { this.state.PaymentCreditCardValid &&
+                                            <ButtonBlock
+                                                icon='checkmark-circle-outline'
+                                                title='Realizar pago'
+                                                color='green'
+                                                colorText='white'
+                                                style={{ marginTop: 20 }}
+                                                onPress={ () => this.sendPaymentCreditCad() }
+                                            />
+                                        }
+                                    </View>
+                                </CollapseBody>
+                            </Collapse> */}
                         </ScrollView>
                     </View>
                 </Modal>

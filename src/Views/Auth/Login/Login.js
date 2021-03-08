@@ -181,16 +181,16 @@ class Login extends Component {
                         </View>
                         <View style={{ padding: 30, paddingTop: 20}}>
                             <ButtonBlock
-                                icon='ios-logo-facebook'
-                                title='Login con Facebook'
-                                color='#3b5998'
-                                onPress={ this.onFacebookButtonPress }
-                            />
-                            <ButtonBlock
                                 icon='ios-logo-google'
                                 title='Login con Google'
                                 color='red'
                                 onPress={ this.onGoogleButtonPress }
+                            />
+                            <ButtonBlock
+                                icon='ios-logo-facebook'
+                                title='Login con Facebook'
+                                color='#3b5998'
+                                onPress={ this.onFacebookButtonPress }
                             />
                             <ButtonBlock
                                 title='Registrarse'
