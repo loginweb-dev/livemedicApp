@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import {
     View,
     StyleSheet,
@@ -8,7 +8,9 @@ import {
     ScrollView,
     Dimensions,
     TouchableOpacity,
-    Modal
+    Modal,
+    Button,
+    Alert
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -18,12 +20,16 @@ import { CreditCardInput, LiteCreditCardInput } from "react-native-credit-card-i
 import { Collapse,CollapseHeader, CollapseBody, AccordionList } from 'accordion-collapse-react-native';
 import RadioForm from 'react-native-simple-radio-button';
 
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import {Picker} from '@react-native-picker/picker';
+
 // UI
 import ButtonBlock from "../../UI/ButtonBlock";
 import HeaderInfo from "../../UI/HeaderInfo";
 import HyperLink from "../../UI/HyperLink";
 import OverlayLoading from "../../UI/OverlayLoading";
 import PartialModal from "../../UI/PartialModal";
+import BackgroundLoading from "../../UI/BackgroundLoading";
 
 // Llamda en proceso
 import CallReturn from "../../UI/CallReturn";
@@ -64,6 +70,8 @@ import TextInputAlt from "../../UI/TextInputAlt";
 const screenWidth = Math.round(Dimensions.get('window').width);
 const screenHeight = Math.round(Dimensions.get('window').height);
 
+const DATE = new Date();
+
 class ProfileView extends Component {
     constructor(props) {
         super(props);
@@ -78,16 +86,29 @@ class ProfileView extends Component {
             radioProps: [],
             accountSeleted: 0,
             PaymentCreditCardValid: false,
+            modalTimePickerOpen: false,
             // Params for request
+            daySelected: DATE.getDay(),
+            date: '',
+            start: '',
             price_add: 0,
             payment_type: 1,
             payment_account_id: null,
             observations: '',
-            loading: false
+            loading: false,
+            isDatePickerVisible: false,
+            appointmentsQueue: [],
+            errorMessage: 'El especialista no se encuentra disponible ahora, si desea puede programar una cita para otro momento.'
         }
     }
 
     async componentDidMount(){
+        // Get current date and hour
+        let dateTime = new Date();
+        let date = `${dateTime.getFullYear()}-${String(dateTime.getMonth()+1).padStart(2, "0")}-${String(dateTime.getDate()).padStart(2, "0")}`;
+        let start = `${String(dateTime.getHours()).padStart(2, "0")}:${String(dateTime.getMinutes()+1).padStart(2, "0")}`;
+        this.setState({date, start});
+
         let res = await fetch(`${env.API}/api/payment_accounts`)
         .then(res => res.json())
         .then(res => res)
@@ -122,14 +143,9 @@ class ProfileView extends Component {
             loading: true
         });
 
-        // Get current date and hour
-        let dateTime = new Date();
-        let date = `${dateTime.getFullYear()}-${String(dateTime.getMonth()+1).padStart(2, "0")}-${String(dateTime.getDate()).padStart(2, "0")}`;
-        let start = `${String(dateTime.getHours()).padStart(2, "0")}:${String(dateTime.getMinutes()+1).padStart(2, "0")}`;
-
         let params = {
-            date,
-            start,
+            date: this.state.date,
+            start: this.state.start,
             speciality_id: this.props.route.params.specialityId,
             price: this.props.route.params.price,
             price_add: this.state.price_add,
@@ -201,6 +217,75 @@ class ProfileView extends Component {
         clearTimeout(timer);
     }
 
+    changeStart = (hourValue) => {
+        let date = new Date(hourValue);
+        let start = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        let hour = start.substring(0, 2);
+        let minutes = start.substring(3);
+
+        this.setState({
+            isDatePickerVisible: false,
+        });
+
+        if(minutes != '00' && minutes != '30'){
+            Alert.alert(
+                "Hora inválida",
+                `Por favor elige un horario válido como: ${hour}:00 o ${hour}:30`,
+                [
+                    { text: "Entendido" }
+                ]
+            );
+            return;
+        }
+        this.setState({
+            start,
+        });
+
+        this.validateAppointment();
+        
+    };
+
+    async validateAppointment(){
+        this.setState({loading: true, appointmentsQueue: []});
+        let params = {day: this.state.daySelected, start: this.state.start+':00'}
+
+        let headers = {
+            method: 'POST',
+            body: JSON.stringify(params),
+            headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json',
+                'Authorization': `Bearer ${this.props.authLogin.token}`
+            },
+        }
+
+        let res = await fetch(`${env.API}/api/appointments/validate_appointment/${this.state.specialist.id}`, headers)
+        .then(res => res.json())
+        .then(res => res)
+        .catch(error => ({'error': error}));
+
+        console.log(res)
+        if(res.success){
+            this.setState({
+                date: res.date,
+                specialist: {
+                    ...this.state.specialist,
+                    status: 'programmer'
+                }
+            });
+        }else{
+            this.setState({
+                specialist: {
+                    ...this.state.specialist,
+                    status: 0
+                },
+                appointmentsQueue: res.appointments_queue,
+                errorMessage: res.error
+            });
+        }
+        this.setState({loading: false});
+    }
+
     render(){
 
         // Redirect to call incoming
@@ -219,6 +304,25 @@ class ProfileView extends Component {
                     available={this.state.specialist.status}
                     description={this.state.specialist.description}
                     onPress={() => this.setState({descriptionModal: true})}
+                    CustomDateTimePicker={
+                        <CustomDateTimePicker
+                            isDatePickerVisible={ this.state.isDatePickerVisible }
+                            hour={ this.state.start }
+                            daySelected={ this.state.daySelected }
+                            setDaySelected={(itemValue, itemIndex) => {
+                                this.setState({daySelected: itemValue}, () => {
+                                    if(this.state.modalTimePickerOpen){
+                                        this.validateAppointment();
+                                    }
+                                });
+                            }}
+                            appointmentsQueue={ this.state.appointmentsQueue }
+                            changeStart={ this.changeStart }
+                            showDatePicker={ () => this.setState({isDatePickerVisible: true, modalTimePickerOpen: true}) }
+                            hideDatePicker={ () => this.setState({isDatePickerVisible: false}) }
+                        />
+                    }
+                    errorMessage={this.state.errorMessage}
                 />
 
                 {/* Modal description */}
@@ -434,6 +538,79 @@ const HeaderCollapse = (props) => {
         </View>
     );
 }
+
+const CustomDateTimePicker = props => {
+    var daysName = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    var days = [{
+        number: DATE.getDay(),
+        name: daysName[DATE.getDay() -1]
+    }];
+
+    let cont = DATE.getDay() +1;
+    for (let index = 0; index < 6; index++) {
+        days.push({
+            number: cont,
+            name: daysName[cont -1]
+        });
+        if(cont == 7){
+            cont = 1;
+        }else{
+            cont++;
+        }
+    }
+
+    return(
+        <>
+            <View style={{flexDirection: 'row'}}>
+                <View style={{width: '50%'}}>
+                    <Picker
+                        selectedValue={props.daySelected}
+                        onValueChange={ props.setDaySelected }
+                    >
+                        {
+                            days.map(day => <Picker.Item key={day.number} label={day.name} value={day.number} />)
+                        }
+                    </Picker>
+                </View>
+                <View style={{width: '50%', flexDirection: 'row'}}>
+                    <View style={{width: '50%'}}>
+                        <Text style={{paddingLeft: 10, marginVertical: 10, fontSize: 18}}>{ props.hour }</Text>
+                    </View>
+                    <View style={{width: '50%', marginTop: 3}}>
+                        <Icon.Button name="stopwatch" backgroundColor="#3b5998" onPress={ props.showDatePicker } >
+                            <Text style={{ fontFamily: 'Arial', fontSize: 15, color: 'white' }}>
+                                Editar
+                            </Text>
+                        </Icon.Button>
+                    </View>
+                </View>
+            </View>
+            <Text style={{color: '#3b5998'}}>Puedes programar una consulta médica para otro momento</Text>
+
+            <View style={{marginVertical: 20, alignItems: 'center'}}>
+                { props.appointmentsQueue.length != 0 && <Text>Citas médicas reservadas</Text>}
+                <ScrollView horizontal={true} showsVerticalScrollIndicator={false}>
+                    <View style={{margin: 5, alignItems: 'center', flexDirection: 'row'}}>
+                        {
+                            props.appointmentsQueue.map(item => <Text key={item.id} style={{paddingHorizontal: 10, backgroundColor: '#EA352F', color: 'white', borderRadius: 10, margin: 5}}>{ item.start.substring(0, 5) } - { item.end.substring(0, 5) }</Text> )
+                        }
+                    </View>
+                </ScrollView>
+            </View>
+
+            <DateTimePickerModal
+                isVisible={ props.isDatePickerVisible }
+                mode="time"
+                onConfirm={ props.changeStart }
+                onCancel={ props.hideDatePicker }
+            />
+        </>
+    );
+}
+
+// const Badge = () =>{
+
+// }
 
 const styles = StyleSheet.create({
     container: {

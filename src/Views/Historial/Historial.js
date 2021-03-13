@@ -4,6 +4,7 @@ import { SafeAreaView,
     View,
     StyleSheet,
     Text,
+    Image,
     Modal,
     Dimensions
 } from 'react-native';
@@ -33,7 +34,8 @@ class Historial extends Component {
         this.state = {
             detailShow: false,
             appointments: this.props.historial,
-            appointmentDetail: {}
+            appointmentDetail: {},
+            loading: true,
         }
     }
 
@@ -50,7 +52,8 @@ class Historial extends Component {
         .then(res => {
             if(!res.message && !res.error){
                 this.setState({
-                    appointments: res.appointments
+                    appointments: res.appointments,
+                    loading: false
                 }, async () => {
                     this.props.setHistorial(res.appointments);
                     await AsyncStorage.setItem('SessionHistorial', JSON.stringify(res.appointments));
@@ -66,9 +69,15 @@ class Historial extends Component {
     }
 
     render(){
-        if(!this.state.appointments.length){
+        if(this.state.loading){
             return(
                 <BackgroundLoading/>
+            )
+        }
+
+        if(!this.state.appointments.length){
+            return(
+                <Empty/>
             )
         }
 
@@ -113,10 +122,29 @@ class Historial extends Component {
     }
 }
 
+const Empty = () => {
+    return(
+        <View style={ styles.containerEmpty }>
+            <Image 
+                source={ require('../../assets/images/empty.png') }
+                style={{width: 100, height: 100, marginBottom: 20}}
+                resizeMode="contain"
+            />
+            <Text style={{ textAlign: 'center', fontSize: 25 }}>No hay historial</Text>
+        </View>
+    );
+}
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingHorizontal: 10
+    },
+    containerEmpty: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     openButton: {
         backgroundColor: "#F194FF",

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View,
     StyleSheet,
@@ -45,25 +45,35 @@ export default function CardProfileHorizontal(props) {
             <View style={{ margin: 5,  }}>
                 <Text style={{ color: '#858585' }}>{props.description}</Text>
             </View>
+
+            <View style={{ margin: 5, marginTop: 20 }}>
+                {props.CustomDateTimePicker}
+            </View>
+            
             <View style={{ alignItems: 'center', position: 'absolute', bottom: 0 }}>
                 {
-                    props.available != 1 &&
+                    props.available == 0 &&
                     <View style={{ alignItems: 'center', marginBottom: 20 }}>
-                        <Text style={{ color: 'red',  textAlign: 'center' }}>El especialista no se encuentra disponible ahora, si desea puede programar una cita para otro momento en nuestra página web.</Text>
-                        <TouchableOpacity
-                            onPress={() => Linking.openURL('https://livemedic.net')}
-                            style={{ marginTop: 5 }}
-                        >
-                            <Text style={{ color: '#0D6FAA', fontSize: 16 }}>livemedic.net</Text>
-                        </TouchableOpacity>
+                        <Text style={{ color: 'red',  textAlign: 'center' }}>{ props.errorMessage }</Text>
                     </View>
                 }
                 {
                     props.available == 1 &&
                     <ButtonBlock
                         icon='videocam-outline'
-                        title='Nueva cita ahora'
+                        title='Nueva consulta ahora'
                         color='green'
+                        colorText='white'
+                        onPress={ props.onPress }
+                        style={{ width: screenWidth, marginBottom: 0, paddingVertical: 5 }}
+                    />
+                }
+                {
+                    props.available == 'programmer' &&
+                    <ButtonBlock
+                        icon='ios-calendar'
+                        title='Programa consulta'
+                        color='#4CC5FA'
                         colorText='white'
                         onPress={ props.onPress }
                         style={{ width: screenWidth, marginBottom: 0, paddingVertical: 5 }}
@@ -77,6 +87,7 @@ export default function CardProfileHorizontal(props) {
 const styles = StyleSheet.create({
     cardContainer: {
         flex: 1,
-        backgroundColor: 'white'
+        backgroundColor: 'white',
+        paddingHorizontal: 10
     }
 });

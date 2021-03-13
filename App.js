@@ -45,7 +45,7 @@ function App() {
   return (
     <Provider store={store}>
       <Navigation/>
-      <FlashMessage position="top" duration={2800} />
+      <FlashMessage position="top" duration={3800} />
     </Provider>
   );
 }
