@@ -19,9 +19,6 @@ import CardCustomerRounded from "../../UI/CardCustomerRounded";
 import BackgroundLoading from "../../UI/BackgroundLoading";
 import AppointmentDetail from "../../UI/AppointmentDetail";
 
-// Llamda en proceso
-import CallReturn from "../../UI/CallReturn";
-
 // Config
 import { env } from '../../config/env';
 
@@ -81,11 +78,6 @@ class Historial extends Component {
             )
         }
 
-        // Redirect to call incoming
-        if(this.props.callInProgress && !this.props.callInit){
-            this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})
-        }
-
         return (
             <SafeAreaView style={ styles.container }>
                 <ScrollView showsVerticalScrollIndicator={false} style={{ paddingVertical: 10 }}>
@@ -114,9 +106,6 @@ class Historial extends Component {
                         <AppointmentDetail data={this.state.appointmentDetail}/>
                     </View>
                 </Modal>
-
-                {/* Llamada en proceso */}
-                { this.props.callInProgress && this.props.callInit && <CallReturn onPress={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
             </SafeAreaView>
         )
     }
@@ -172,7 +161,6 @@ const mapStateToProps = (state) => {
     return {
         authLogin: state.authLogin,
         callInfo: state.callInfo,
-        callInit: state.callInit,
         callInProgress: state.callInProgress,
         historial: state.historial
     }
@@ -183,14 +171,6 @@ const mapDispatchToProps = (dispatch) => {
         setCallInfo : (callInfo) => dispatch({
             type: 'SET_CALL_INFO',
             payload: callInfo
-        }),
-        setCallInit : (callInit) => dispatch({
-            type: 'SET_CALL_INIT',
-            payload: callInit
-        }),
-        setCallInProgress : (callInProgress) => dispatch({
-            type: 'SET_CALL_IN_PROGRESS',
-            payload: callInProgress
         }),
         setHistorial : (historial) => dispatch({
             type: 'SET_HISTORIAL',

@@ -18,9 +18,6 @@ import CardBorderLeft from "../../UI/CardBorderLeft";
 import BackgroundLoading from "../../UI/BackgroundLoading";
 import HeaderInfo from "../../UI/HeaderInfo";
 
-// Llamda en proceso
-import CallReturn from "../../UI/CallReturn";
-
 // Config
 import { env } from "../../config/env";
 
@@ -41,44 +38,6 @@ class Home extends Component {
             },
         }
         
-        const SessionCallInfo = await AsyncStorage.getItem('SessionCallInfo');
-        if(SessionCallInfo != '' && SessionCallInfo != '{}'){
-            try {
-                let info = JSON.parse(SessionCallInfo);
-                this.props.setCallInfo({
-                    id: info.id,
-                    url: info.url,
-                    specialist: {
-                        name: info.specialistName,
-                        avatar: info.specialistAvatar
-                    }
-                });
-                this.props.setCallInProgress(true);
-            } catch (error) {
-                console.log(error)
-            }
-        }else{
-            fetch(`${env.API}/api/appointment/active/${this.props.authLogin.user.customer.id}`, headers)
-            .then(res => res.json())
-            .then(res => {
-                // console.log(res)
-                if(res.appointment){
-                    this.props.setCallInfo({
-                        id: res.appointment.id,
-                        url: `${res.server}/Consulta-${res.appointment.code}`,
-                        specialist: {
-                            name: res.appointment.specialist.full_name,
-                            avatar: `${env.API}/storage/${res.appointment.specialist.user.avatar}`
-                        }
-                    });
-                    this.props.setCallInit(true);
-                    this.props.setCallInProgress(true);
-                }
-            })
-            .catch(error => ({'error': error}));
-        }
-
-        
         fetch(`${env.API}/api/index`, headers)
         .then(res => res.json())
         .then(res => {
@@ -89,27 +48,16 @@ class Home extends Component {
             }
         })
         .catch(error => ({'error': error}));
-    }
 
-    async componentDidUpdate(){
-        const SessionCallInfo = await AsyncStorage.getItem('SessionCallInfo');
-        if(SessionCallInfo != '' && SessionCallInfo != '{}'){
-            try {
-                let info = JSON.parse(SessionCallInfo);
-                this.props.setCallInfo({
-                    id: info.id,
-                    url: info.url,
-                    specialist: {
-                        name: info.specialistName,
-                        avatar: info.specialistAvatar
-                    }
-                });
-                this.props.setCallInProgress(true);
-                this.props.navigation.navigate('VideoCall', {callInfo: info});
-            } catch (error) {
-                console.log(error)
-            }
+        // Verificar si se dede mostrar el modal de rating
+        const SessionCallRating = await AsyncStorage.getItem('SessionCallRating');
+        let callRating = SessionCallRating ? JSON.parse(SessionCallRating) : {};
+        if(callRating.id){
+            this.props.setCallRating({
+                id: callRating.id
+            });
         }
+        await AsyncStorage.setItem('SessionCallRating', '{}');
     }
 
     render(){
@@ -119,10 +67,6 @@ class Home extends Component {
             )
         }
 
-        // Redirect to call incoming
-        if(this.props.callInProgress && !this.props.callInit){
-            this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})
-        }
         return (
             <SafeAreaView style={ styles.container }>
                 <HeaderInfo title='Elige la especialidad'>
@@ -145,10 +89,6 @@ class Home extends Component {
                     }
                     numColumns={2}
                 />
-
-                {/* Llamada en proceso */}
-                { this.props.callInProgress && this.props.callInit && <CallReturn onPress={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
-            
             </SafeAreaView>
         )
     }
@@ -164,7 +104,6 @@ const mapStateToProps = (state) => {
     return {
         authLogin: state.authLogin,
         callInfo: state.callInfo,
-        callInit: state.callInit,
         callInProgress: state.callInProgress
     }
 }
@@ -175,13 +114,9 @@ const mapDispatchToProps = (dispatch) => {
             type: 'SET_CALL_INFO',
             payload: callInfo
         }),
-        setCallInit : (callInit) => dispatch({
-            type: 'SET_CALL_INIT',
-            payload: callInit
-        }),
-        setCallInProgress : (callInProgress) => dispatch({
-            type: 'SET_CALL_IN_PROGRESS',
-            payload: callInProgress
+        setCallRating : (callRating) => dispatch({
+            type: 'SET_CALL_RATING',
+            payload: callRating
         }),
     }
 }

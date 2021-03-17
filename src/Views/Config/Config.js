@@ -21,9 +21,6 @@ import TextInputAlt from "../../UI/TextInputAlt";
 import ButtonBlock from "../../UI/ButtonBlock";
 import ClearFix from "../../UI/ClearFix";
 
-// Llamda en proceso
-import CallReturn from "../../UI/CallReturn";
-
 // Configurations
 import { env } from '../../config/env.js';
 
@@ -74,12 +71,6 @@ class Config extends Component {
     }
 
     render(){
-
-        // Redirect to call incoming
-        if(this.props.callInProgress && !this.props.callInit){
-            this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})
-        }
-
         return (
             <SafeAreaView style={ styles.container }>
                 <ScrollView showsVerticalScrollIndicator={false} style={{ paddingVertical: 10 }}>
@@ -175,9 +166,6 @@ class Config extends Component {
                         <ClearFix height={50} />
                     </ScrollView>
                 </Modal>
-
-                {/* Llamada en proceso */}
-                { this.props.callInProgress && this.props.callInit && <CallReturn onPress={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
             </SafeAreaView>
         )
     }
@@ -219,7 +207,6 @@ const mapStateToProps = (state) => {
     return {
         authLogin: state.authLogin,
         callInfo: state.callInfo,
-        callInit: state.callInit,
         callInProgress: state.callInProgress,
         historial: state.historial
     }
@@ -231,15 +218,7 @@ const mapDispatchToProps = (dispatch) => {
         setCallInfo : (callInfo) => dispatch({
             type: 'SET_CALL_INFO',
             payload: callInfo
-        }),
-        setCallInit : (callInit) => dispatch({
-            type: 'SET_CALL_INIT',
-            payload: callInit
-        }),
-        setCallInProgress : (callInProgress) => dispatch({
-            type: 'SET_CALL_IN_PROGRESS',
-            payload: callInProgress
-        }),
+        })
     }
 }
 

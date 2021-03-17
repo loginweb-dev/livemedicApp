@@ -13,9 +13,12 @@ const screenWidth = Math.round(Dimensions.get('window').width);
 
 function CallReturn(props) {
     
+    const returnCall = () => {
+        props.setCallInProgress(true);
+    }
+
     const closeCall = () => {
         props.setCallInfo({});
-        props.setCallInit(false);
         props.setCallInProgress(false);
     }
 
@@ -23,7 +26,7 @@ function CallReturn(props) {
         <View style={ styles.container }>
             <View style={ styles.button }>
                 <TouchableHighlight
-                    onPress={props.onPress}
+                    onPress={returnCall}
                     style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: '#377097', borderTopStartRadius: 10, borderBottomStartRadius: 10 }}
                 >
                     <Text style={{ color: 'white', fontSize: 20 }}>Volver a la llamada</Text>
@@ -43,7 +46,7 @@ const styles = StyleSheet.create({
     container: { 
         width: screenWidth,
         position: 'absolute',
-        bottom: 20,
+        bottom: 60,
         left: 0,
         right: 0,
         margin: 0,
@@ -63,10 +66,6 @@ const mapDispatchToProps = (dispatch) => {
         setCallInfo : (callInfo) => dispatch({
             type: 'SET_CALL_INFO',
             payload: callInfo
-        }),
-        setCallInit : (callInit) => dispatch({
-            type: 'SET_CALL_INIT',
-            payload: callInit
         }),
         setCallInProgress : (callInProgress) => dispatch({
             type: 'SET_CALL_IN_PROGRESS',

@@ -17,9 +17,6 @@ import { connect } from 'react-redux';
 import CardProfile from "../../UI/CardProfile";
 import ClearFix from "../../UI/ClearFix";
 
-// Llamda en proceso
-import CallReturn from "../../UI/CallReturn";
-
 // Config
 import { env } from "../../config/env";
 
@@ -32,12 +29,6 @@ class ProfileList extends Component {
     }
 
     render(){
-        
-        // Redirect to call incoming
-        if(this.props.callInProgress && !this.props.callInit){
-            this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})
-        }
-
         return (
             <SafeAreaView style={ styles.container }>
                 <FlatList
@@ -79,8 +70,6 @@ class ProfileList extends Component {
                     }
                     numColumns={2}
                 />
-                {/* Llamada en proceso */}
-                { this.props.callInProgress && this.props.callInit && <CallReturn onPress={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
             </SafeAreaView>
         )
     }
@@ -96,7 +85,6 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
     return {
         callInfo: state.callInfo,
-        callInit: state.callInit,
         callInProgress: state.callInProgress
     }
 }
@@ -106,14 +94,6 @@ const mapDispatchToProps = (dispatch) => {
         setCallInfo : (callInfo) => dispatch({
             type: 'SET_CALL_INFO',
             payload: callInfo
-        }),
-        setCallInit : (callInit) => dispatch({
-            type: 'SET_CALL_INIT',
-            payload: callInit
-        }),
-        setCallInProgress : (callInProgress) => dispatch({
-            type: 'SET_CALL_IN_PROGRESS',
-            payload: callInProgress
         }),
     }
 }

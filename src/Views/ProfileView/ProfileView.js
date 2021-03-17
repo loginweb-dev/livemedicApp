@@ -31,9 +31,6 @@ import OverlayLoading from "../../UI/OverlayLoading";
 import PartialModal from "../../UI/PartialModal";
 import BackgroundLoading from "../../UI/BackgroundLoading";
 
-// Llamda en proceso
-import CallReturn from "../../UI/CallReturn";
-
 // Config
 import { env } from "../../config/env";
 
@@ -264,7 +261,6 @@ class ProfileView extends Component {
         .then(res => res)
         .catch(error => ({'error': error}));
 
-        console.log(res)
         if(res.success){
             this.setState({
                 date: res.date,
@@ -279,7 +275,7 @@ class ProfileView extends Component {
                     ...this.state.specialist,
                     status: 0
                 },
-                appointmentsQueue: res.appointments_queue,
+                appointmentsQueue: res.appointments_queue ? res.appointments_queue : [],
                 errorMessage: res.error
             });
         }
@@ -287,16 +283,11 @@ class ProfileView extends Component {
     }
 
     render(){
-
-        // Redirect to call incoming
-        if(this.props.callInProgress && !this.props.callInit){
-            this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})
-        }
-
         return (
             <SafeAreaView style={ styles.container }>
                 <CardProfileHorizontal
                     name={this.state.specialist.full_name}
+                    schedules={this.state.specialist.schedules}
                     location={this.state.specialist.location}
                     avatar={this.props.route.params.avatar}
                     price={this.props.route.params.price}
@@ -514,9 +505,6 @@ class ProfileView extends Component {
                     </View>
                 </Modal>
 
-                {/* Llamada en proceso */}
-                { this.props.callInProgress && this.props.callInit && <CallReturn onPress={() => this.props.navigation.navigate('VideoCall', {callInfo: this.props.callInfo})} />}
-
                 { this.state.loading && <OverlayLoading/>}
             </SafeAreaView>
         )
@@ -562,7 +550,7 @@ const CustomDateTimePicker = props => {
     return(
         <>
             <View style={{flexDirection: 'row'}}>
-                <View style={{width: '50%'}}>
+                <View style={{width: '70%'}}>
                     <Picker
                         selectedValue={props.daySelected}
                         onValueChange={ props.setDaySelected }
@@ -572,24 +560,24 @@ const CustomDateTimePicker = props => {
                         }
                     </Picker>
                 </View>
-                <View style={{width: '50%', flexDirection: 'row'}}>
-                    <View style={{width: '50%'}}>
+                <View style={{width: '30%', flexDirection: 'row'}}>
+                    <View style={{width: '60%'}}>
                         <Text style={{paddingLeft: 10, marginVertical: 10, fontSize: 18}}>{ props.hour }</Text>
                     </View>
-                    <View style={{width: '50%', marginTop: 3}}>
-                        <Icon.Button name="stopwatch" backgroundColor="#3b5998" onPress={ props.showDatePicker } >
-                            <Text style={{ fontFamily: 'Arial', fontSize: 15, color: 'white' }}>
-                                Editar
-                            </Text>
-                        </Icon.Button>
+                    <View style={{width: '40%', marginTop: 3}}>
+                        <TouchableOpacity onPress={ props.showDatePicker } >
+                            <Icon name="stopwatch" color='#3b5998' size={35} />  
+                        </TouchableOpacity>
                     </View>
                 </View>
             </View>
-            <Text style={{color: '#3b5998'}}>Puedes programar una consulta médica para otro momento</Text>
+            <View style={{textAligns: 'center'}}>
+                <Text style={{color: '#3b5998', textAlign: 'center'}}>Puedes programar una consulta médica para otro momento, toca el reloj para cambiar la hora.</Text>
+            </View>
 
             <View style={{marginVertical: 20, alignItems: 'center'}}>
                 { props.appointmentsQueue.length != 0 && <Text>Citas médicas reservadas</Text>}
-                <ScrollView horizontal={true} showsVerticalScrollIndicator={false}>
+                <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
                     <View style={{margin: 5, alignItems: 'center', flexDirection: 'row'}}>
                         {
                             props.appointmentsQueue.map(item => <Text key={item.id} style={{paddingHorizontal: 10, backgroundColor: '#EA352F', color: 'white', borderRadius: 10, margin: 5}}>{ item.start.substring(0, 5) } - { item.end.substring(0, 5) }</Text> )
@@ -627,7 +615,6 @@ const mapStateToProps = (state) => {
     return {
         authLogin: state.authLogin,
         callInfo: state.callInfo,
-        callInit: state.callInit,
         callInProgress: state.callInProgress
     }
 }
@@ -637,14 +624,6 @@ const mapDispatchToProps = (dispatch) => {
         setCallInfo : (callInfo) => dispatch({
             type: 'SET_CALL_INFO',
             payload: callInfo
-        }),
-        setCallInit : (callInit) => dispatch({
-            type: 'SET_CALL_INIT',
-            payload: callInit
-        }),
-        setCallInProgress : (callInProgress) => dispatch({
-            type: 'SET_CALL_IN_PROGRESS',
-            payload: callInProgress
         }),
     }
 }
