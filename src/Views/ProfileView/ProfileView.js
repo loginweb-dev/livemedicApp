@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import {
     View,
     StyleSheet,
@@ -10,7 +10,8 @@ import {
     TouchableOpacity,
     Modal,
     Button,
-    Alert
+    Alert,
+    Switch
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -19,9 +20,13 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { CreditCardInput, LiteCreditCardInput } from "react-native-credit-card-input";
 import { Collapse,CollapseHeader, CollapseBody, AccordionList } from 'accordion-collapse-react-native';
 import RadioForm from 'react-native-simple-radio-button';
-
+import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import Geolocation from '@react-native-community/geolocation';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import {Picker} from '@react-native-picker/picker';
+import SelectMultiple from 'react-native-select-multiple'
+import { showMessage } from "react-native-flash-message";
+
 
 // UI
 import ButtonBlock from "../../UI/ButtonBlock";
@@ -30,6 +35,10 @@ import HyperLink from "../../UI/HyperLink";
 import OverlayLoading from "../../UI/OverlayLoading";
 import PartialModal from "../../UI/PartialModal";
 import BackgroundLoading from "../../UI/BackgroundLoading";
+import CardProfileHorizontal from "../../UI/CardProfileHorizontal";
+import ClearFix from "../../UI/ClearFix";
+import AlertGradient from "../../UI/AlertGradient";
+import TextInputAlt from "../../UI/TextInputAlt";
 
 // Config
 import { env } from "../../config/env";
@@ -58,12 +67,6 @@ const LabelRadioButton = (props) => {
 }
 var timer = null;
 
-// UI
-import CardProfileHorizontal from "../../UI/CardProfileHorizontal";
-import ClearFix from "../../UI/ClearFix";
-import AlertGradient from "../../UI/AlertGradient";
-import TextInputAlt from "../../UI/TextInputAlt";
-
 const screenWidth = Math.round(Dimensions.get('window').width);
 const screenHeight = Math.round(Dimensions.get('window').height);
 
@@ -73,7 +76,21 @@ class ProfileView extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json',
+                'Authorization': `Bearer ${this.props.authLogin.token}`
+            },
+            initialLat : env.location.latitude,
+            initialLon: env.location.longitude,
+            region: {
+                latitude: env.location.latitude,
+                longitude: env.location.longitude,
+                latitudeDelta: 0.0422,
+                longitudeDelta: screenWidth / (screenHeight - 130) * 0.0422
+            },
             specialist: this.props.route.params.specialist,
+            speciality_id: this.props.route.params.speciality_id,
             paymentAccounts: [],
             descriptionModal: false,
             paymentModal: false,
@@ -81,6 +98,9 @@ class ProfileView extends Component {
             errorModal: false,
             collapseStatus: [true, false, false],
             radioProps: [],
+            servicesList: [],
+            services: [],
+            selectedServices: [],
             accountSeleted: 0,
             PaymentCreditCardValid: false,
             modalTimePickerOpen: false,
@@ -88,7 +108,9 @@ class ProfileView extends Component {
             daySelected: DATE.getDay(),
             date: '',
             start: '',
+            price: this.props.route.params.price,
             price_add: 0,
+            priceAltSwitch: false,
             payment_type: 1,
             payment_account_id: null,
             observations: '',
@@ -123,6 +145,96 @@ class ProfileView extends Component {
             });
             this.setState({radioProps, paymentAccounts: res.paymentAccounts});
         }
+
+        Geolocation.getCurrentPosition(async position => {
+            this.setState({
+                region: {
+                    ...this.state.region,
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                },
+            });
+
+            // Si la especialidad es enfermería se ejecuta ésta función
+            if(this.state.speciality_id == 3){
+                // Change map center
+                this.map.animateToRegion({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    latitudeDelta: this.state.region.latitudeDelta,
+                    longitudeDelta: this.state.region.longitudeDelta
+                });
+
+                let res = await fetch(`${env.API}/api/services`)
+                .then(res => res.json())
+                .then(res => res)
+                .catch(error => ({'error': error}));
+
+                let services = [];
+                if(res.services){
+                    res.services.map(service => {
+                        services.push({
+                            label: service.name, value: service.id
+                        });
+                    });
+                    this.setState({servicesList: res.services, services});
+                }
+            }
+        });
+    }
+
+    handleCurrentLocation(location){
+        this.setState({
+            region: {
+                ...this.state.region,
+                latitude: location.latitude,
+                longitude: location.longitude,
+            }
+        })
+    }
+
+    handleSwitch = () => {
+        if(this.state.priceAltSwitch){
+            this.setState({price: this.props.route.params.price, priceAltSwitch: !this.state.priceAltSwitch});
+            return;
+        }
+        fetch(`${env.API}/api/appointments/customer/${this.props.authLogin.user.customer.id}/${this.state.specialist.id}/${this.state.speciality_id}`, {headers: this.state.headers})
+        .then(res => res.json())
+        .then(res => {
+            if(res.speciality){
+                this.setState({
+                    price: res.speciality.price_alt
+                });
+                this.setState({priceAltSwitch: !this.state.priceAltSwitch});
+            }else{
+                showMessage({
+                    message: "Error",
+                    description: res.error,
+                    type: "danger",
+                    icon: 'danger'
+                });
+            }
+        })
+        .catch(error => ({'error': error}));
+    }
+
+    selectMultipleChange = selectedServices => {
+        this.setState({selectedServices}, () => {
+            let observations = '';
+            let price = 0;
+
+            this.state.selectedServices.map(item => {
+                observations += item.label+', ';
+
+                // Calcular el monto a pagar
+                this.state.servicesList.map(service => {
+                    if(service.id == item.value){
+                        price += parseFloat(service.price);
+                    }
+                });
+            });
+            this.setState({observations: observations.substring(0, observations.length-2)+'.', price: price.toFixed(2)});
+        });
     }
 
     handleCreditCard = form => {
@@ -140,18 +252,25 @@ class ProfileView extends Component {
             loading: true
         });
 
+        let service_id = [];
+        this.state.selectedServices.map(item => {
+            service_id.push(item.value);
+        });
+
         let params = {
             date: this.state.date,
             start: this.state.start,
-            speciality_id: this.props.route.params.specialityId,
-            price: this.props.route.params.price,
+            speciality_id: this.state.speciality_id,
+            price: this.state.price,
             price_add: this.state.price_add,
             ajax: 1,
-            specialist_id: this.props.route.params.specialist.id,
+            specialist_id: this.state.specialist.id,
             customer_id: this.props.authLogin.user.customer.id,
             payment_type: this.state.payment_type,
             payment_account_id: this.state.paymentAccounts[this.state.accountSeleted].id,
             observations: this.state.observations ? this.state.observations : 'No definido',
+            location: `${this.state.region.latitude},${this.state.region.longitude}`,
+            service_id
         }
 
         let headers = {
@@ -282,24 +401,40 @@ class ProfileView extends Component {
         this.setState({loading: false});
     }
 
+    handleDescription = () => {
+        if(this.state.speciality_id == 3 && this.state.selectedServices.length == 0){
+            showMessage({
+                message: "Error",
+                description: 'Debes seleccionar al menos un servicio de enfermería',
+                type: "warning",
+                icon: 'warning'
+            });
+            return;
+        }
+
+        this.setState({descriptionModal: true})
+    }
+
     render(){
         return (
             <SafeAreaView style={ styles.container }>
                 <CardProfileHorizontal
+                    speciality_id={ this.state.speciality_id }
                     name={this.state.specialist.full_name}
                     schedules={this.state.specialist.schedules}
                     location={this.state.specialist.location}
                     avatar={this.props.route.params.avatar}
-                    price={this.props.route.params.price}
+                    price={this.state.price}
                     rating={this.props.route.params.rating}
                     available={this.state.specialist.status}
                     description={this.state.specialist.description}
-                    onPress={() => this.setState({descriptionModal: true})}
+                    onPress={ this.handleDescription }
                     CustomDateTimePicker={
                         <CustomDateTimePicker
                             isDatePickerVisible={ this.state.isDatePickerVisible }
                             hour={ this.state.start }
                             daySelected={ this.state.daySelected }
+                            speciality_id={ this.state.speciality_id }
                             setDaySelected={(itemValue, itemIndex) => {
                                 this.setState({daySelected: itemValue}, () => {
                                     if(this.state.modalTimePickerOpen){
@@ -311,8 +446,52 @@ class ProfileView extends Component {
                             changeStart={ this.changeStart }
                             showDatePicker={ () => this.setState({isDatePickerVisible: true, modalTimePickerOpen: true}) }
                             hideDatePicker={ () => this.setState({isDatePickerVisible: false}) }
+                            switch={
+                                <View style={{flex: 1, flexDirection: 'row'}}>
+                                    <Switch
+                                        trackColor={{ false: "#767577", true: "#AAC7F9" }}
+                                        thumbColor={this.state.priceAltSwitch ? "#5688DC" : "#f4f3f4"}
+                                        onValueChange={ this.handleSwitch }
+                                        value={this.state.priceAltSwitch}
+                                    />
+                                    <Text style={{marginTop: 15, fontSize: 13}}>Reconsulta</Text>
+                                </View>
+                            }
+                            MapView={
+                                <MapView
+                                    ref={map => {this.map = map}}
+                                    provider={PROVIDER_GOOGLE}
+                                    style={styles.map}
+                                    initialRegion={this.state.region}
+                                >
+                                    <Marker
+                                        draggable
+                                        onDragEnd={(e) => this.handleCurrentLocation(e.nativeEvent.coordinate)}
+                                        title="Mi ubicación"
+                                        description="Nuestra enfermera se dirijirá a ésta ubicación"
+                                        coordinate={
+                                            { 
+                                            latitude: this.state.region.latitude,
+                                            longitude: this.state.region.longitude
+                                            }
+                                        }
+                                    />
+                                </MapView>
+                            }
                         />
                     }
+                    checkBoxService={
+                        <View style={{flex:1, marginTop: 10}}>
+                            {this.state.services.length > 0 && <View style={{flex: 1, alignItems: 'center'}}><Text>Selecciona al menos un servicio</Text></View>}
+                            
+                            <SelectMultiple
+                                items={this.state.services}
+                                selectedItems={this.state.selectedServices}
+                                onSelectionsChange={ this.selectMultipleChange }
+                            />
+                        </View>
+                    }
+                    
                     errorMessage={this.state.errorMessage}
                 />
 
@@ -412,6 +591,9 @@ class ProfileView extends Component {
                                                 }
                                             </View>
                                         </AlertGradient>
+                                        <View style={{ flex: 1, alignItems: 'center', padding: 10}}>
+                                            <Text style={{fontSize: 25, color: '#858585'}}>Total: {this.state.price} Bs.</Text>
+                                        </View>
                                         <ButtonBlock
                                             icon='checkmark-circle-outline'
                                             title='Aceptar y continuar'
@@ -547,10 +729,19 @@ const CustomDateTimePicker = props => {
         }
     }
 
+
+    if(props.speciality_id == 3){
+        return(
+            <View style={{marginTop: 20, paddingBottom: 80}}>
+                { props.MapView }
+                <Text style={{color: '#858585'}}>Ésta ubicación será proporcianodad a la enfermera que te realizará el servicio.</Text>
+            </View>
+        );
+    }
     return(
-        <>
-            <View style={{flexDirection: 'row'}}>
-                <View style={{width: '70%'}}>
+        <View style={{marginTop: 20, paddingBottom: 50}}>
+            <View style={{flexDirection: 'row', marginTop: 20}}>
+                <View style={{width: '40%'}}>
                     <Picker
                         selectedValue={props.daySelected}
                         onValueChange={ props.setDaySelected }
@@ -561,14 +752,17 @@ const CustomDateTimePicker = props => {
                     </Picker>
                 </View>
                 <View style={{width: '30%', flexDirection: 'row'}}>
-                    <View style={{width: '60%'}}>
+                    <View style={{width: '50%'}}>
                         <Text style={{paddingLeft: 10, marginVertical: 10, fontSize: 18}}>{ props.hour }</Text>
                     </View>
-                    <View style={{width: '40%', marginTop: 3}}>
+                    <View style={{width: '50%', marginTop: 5}}>
                         <TouchableOpacity onPress={ props.showDatePicker } >
-                            <Icon name="stopwatch" color='#3b5998' size={35} />  
+                            <Icon name="stopwatch" color='#3b5998' size={30} />  
                         </TouchableOpacity>
                     </View>
+                </View>
+                <View style={{width: '40%'}}>
+                    { props.switch }
                 </View>
             </View>
             <View style={{textAligns: 'center'}}>
@@ -592,7 +786,7 @@ const CustomDateTimePicker = props => {
                 onConfirm={ props.changeStart }
                 onCancel={ props.hideDatePicker }
             />
-        </>
+        </View>
     );
 }
 
@@ -603,6 +797,10 @@ const CustomDateTimePicker = props => {
 const styles = StyleSheet.create({
     container: {
         flex: 1
+    },
+    map: {
+        height: 250,
+        width: screenWidth
     },
     infoContent: {
         flex: 1,

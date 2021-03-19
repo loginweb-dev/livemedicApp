@@ -24,7 +24,8 @@ class ProfileList extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            specialities: this.props.route.params.speciality.specialists
+            specialities: this.props.route.params.speciality.specialists,
+            speciality_id: this.props.route.params.speciality.id
         }
     }
 
@@ -58,6 +59,7 @@ class ProfileList extends Component {
                                 rating={ rating }
                                 available={item.status == 1 ? true : false }
                                 onPress={() => this.props.navigation.navigate('ProfileView', {
+                                    speciality_id: this.state.speciality_id,
                                     specialist: item,
                                     avatar: `${env.API}/storage/${item.user.avatar}`,
                                     rating: rating,

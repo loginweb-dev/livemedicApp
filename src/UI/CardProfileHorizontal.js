@@ -47,37 +47,42 @@ export default function CardProfileHorizontal(props) {
 
     return (
         <View style={styles.cardContainer} >
-            <ImageBackground
-                source={{ uri: props.avatar }}
-                style={{ width: '100%', height: 250 }}
-            />
-            <View style={{ margin: 5, flexDirection: 'row',  }}>
-                <View style={{ width: '65%' }}>
-                    <Text style={{ fontSize: 18, color: '#616161' }} numberOfLines={1}>{ props.name }</Text>
-                    <Text style={{ fontSize: 15, color: '#858585' }} numberOfLines={1}>{ props.location }</Text>
-                    <Text style={{ fontSize: 18, color: '#858585' }} numberOfLines={1}>{ props.price } Bs.</Text>
-                </View>
-                <View style={{ width: '35%' }}>
-                    <Rating
-                        type='star'
-                        startingValue={props.rating}
-                        readonly
-                        imageSize={20}
-                        style={{ padding: 5, flexDirection: 'row-reverse', marginBottom: 5 }}
-                    />
-                    <Icon.Button name="calendar-sharp" backgroundColor="#3b5998" onPress={ () => setShowSchedules(true) } >
-                        <Text style={{ fontFamily: 'Arial', fontSize: 13, color: 'white' }}>
-                            Ver horarios
-                        </Text>
-                    </Icon.Button>
-                </View>
-            </View>
-            <View style={{ margin: 5,  }}>
-                <Text style={{ color: '#858585' }}>{props.description}</Text>
-            </View>
+            <ScrollView style={{ margin: 5 }} showsVerticalScrollIndicator={false}>
+                <ImageBackground
+                    source={{ uri: props.avatar }}
+                    style={{ width: '100%', height: 250 }}
+                />
 
-            <ScrollView style={{ margin: 5, marginTop: 20 }} showsVerticalScrollIndicator={false}>
-                {props.CustomDateTimePicker}
+                <View style={{ margin: 5, flexDirection: 'row',  }}>
+                    <View style={{ width: '65%' }}>
+                        <Text style={{ fontSize: 18, color: '#616161' }} numberOfLines={1}>{ props.name }</Text>
+                        <Text style={{ fontSize: 15, color: '#858585' }} numberOfLines={1}>{ props.location }</Text>
+                        <Text style={{ fontSize: 18, color: '#858585' }} numberOfLines={1}>{ props.price } Bs.</Text>
+                    </View>
+                    <View style={{ width: '35%' }}>
+                        <Rating
+                            type='star'
+                            startingValue={props.rating}
+                            readonly
+                            imageSize={20}
+                            style={{ padding: 5, flexDirection: 'row-reverse', marginBottom: 5 }}
+                        />
+                        <Icon.Button name="calendar-sharp" backgroundColor="#3b5998" onPress={ () => setShowSchedules(true) } >
+                            <Text style={{ fontFamily: 'Arial', fontSize: 13, color: 'white' }}>
+                                Ver horarios
+                            </Text>
+                        </Icon.Button>
+                    </View>
+                </View>
+                <View style={{ margin: 5,  }}>
+                    <Text style={{ color: '#858585' }}>{props.description}</Text>
+                </View>
+
+                {/* Lista de servicios de enfermería */}
+                { props.checkBoxService }
+                
+                {/* Panel de cambio de horario de cita médica */}
+                { props.CustomDateTimePicker }
             </ScrollView>
             
             <View style={{ alignItems: 'center', position: 'absolute', bottom: 0 }}>
@@ -90,8 +95,8 @@ export default function CardProfileHorizontal(props) {
                 {
                     props.available == 1 &&
                     <ButtonBlock
-                        icon='videocam-outline'
-                        title='Nueva consulta ahora'
+                        icon={ props.speciality_id == 3 ? 'md-medkit-sharp' : 'videocam-outline'}
+                        title={props.speciality_id == 3 ? 'Solicitar enfermera a domicilio' : 'Nueva consulta ahora'}
                         color='green'
                         colorText='white'
                         onPress={ props.onPress }
@@ -119,7 +124,7 @@ export default function CardProfileHorizontal(props) {
                 onRequestClose={()=> setShowSchedules(false)}
             >
                 <View style={{flex: 1}}>
-                    <View style={{paddingTop: 50}}>
+                    <View>
                         <Text style={{textAlign: 'center', fontSize: 30}}>Horarios de atención</Text>
                     </View>
                     <View style={{paddingHorizontal: 20, paddingTop: 30}}>
