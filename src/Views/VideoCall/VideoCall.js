@@ -47,6 +47,7 @@ function VideoCall(props) {
         clearTimeout(timer);
         props.setCallInProgress(false);
         JitsiMeet.endCall();
+        return;
         // props.navigation.navigate('TabMenu');
     });
 

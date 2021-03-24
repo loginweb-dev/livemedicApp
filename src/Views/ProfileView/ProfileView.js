@@ -570,7 +570,7 @@ class ProfileView extends Component {
                                                 animation={true}
                                                 formHorizontal={true}
                                                 labelHorizontal={false}
-                                                labelStyle={{ marginTop: 40 }}
+                                                labelStyle={{ marginTop: 40, marginHorizontal: 25 }}
                                             />
                                         </View>
                                         <AlertGradient
@@ -579,7 +579,7 @@ class ProfileView extends Component {
                                             footer='Cualquier reclamo comunicarse con nuestro centro de atención al cliente.'
                                         >
                                             <Text style={{ color: 'white', textAlign: 'center' }}>
-                                                Debes realizar una tranferencia bancaria al número de cuenta seleccionado y posteriormente enviar una captura del comprobante de tranferencia a cualquiera de los siguientes números de Whatsapp:
+                                                Debes realizar una tranferencia bancaria o si deseas a tigo Money al correspondiente número y posteriormente enviar una captura del comprobante de tranferencia a cualquiera de los siguientes números de Whatsapp:
                                             </Text>
                                             <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20}}>
                                                 {
@@ -739,9 +739,9 @@ const CustomDateTimePicker = props => {
         );
     }
     return(
-        <View style={{marginTop: 20, paddingBottom: 50}}>
-            <View style={{flexDirection: 'row', marginTop: 20}}>
-                <View style={{width: '40%'}}>
+        <View style={{paddingBottom: 50}}>
+            <View style={{flexDirection: 'row'}}>
+                <View style={{width: '35%'}}>
                     <Picker
                         selectedValue={props.daySelected}
                         onValueChange={ props.setDaySelected }
@@ -751,13 +751,13 @@ const CustomDateTimePicker = props => {
                         }
                     </Picker>
                 </View>
-                <View style={{width: '30%', flexDirection: 'row'}}>
-                    <View style={{width: '50%'}}>
-                        <Text style={{paddingLeft: 10, marginVertical: 10, fontSize: 18}}>{ props.hour }</Text>
-                    </View>
-                    <View style={{width: '50%', marginTop: 5}}>
+                <View style={{width: '25%'}}>
+                    <View style={{ marginTop: 5}}>
                         <TouchableOpacity onPress={ props.showDatePicker } >
-                            <Icon name="stopwatch" color='#3b5998' size={30} />  
+                            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 5}}>
+                                <Text style={{fontSize: 18}}>{ props.hour }</Text>
+                                <Icon name="stopwatch" color='#3b5998' size={20} />
+                            </View>
                         </TouchableOpacity>
                     </View>
                 </View>
